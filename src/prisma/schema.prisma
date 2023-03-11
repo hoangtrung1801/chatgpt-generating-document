@@ -10,8 +10,76 @@ generator client {
   provider = "prisma-client-js"
 }
 
-model User {
-  id       Int    @id @default(autoincrement())
-  email    String @unique
-  password String
+model Category {
+  id           Int     @id @default(autoincrement())
+  name         String  @map("category_name")
+  thumbnail    String  @map("category_thumbnail")
+  primaryColor String  @map("primary_color")
+  status       Boolean @db.Bit(1)
+
+  questions Question[]
+
+  @@map("ai_category")
+}
+
+model Question {
+  id          Int     @id @default(autoincrement())
+  name        String  @map("question_name")
+  description String  @map("question_description") @db.Text
+  questionGPT String  @map("question_gpt") @db.Text
+  status      Boolean @default(true) @db.Bit(1)
+
+  category   Category @relation(fields: [categoryId], references: [id])
+  categoryId Int      @map("category_id")
+
+  options Option[]
+
+  @@map("ai_question")
+}
+
+model Option {
+  id          Int     @id @default(autoincrement())
+  name        String  @map("option_name")
+  description String  @map("option_description") @db.Text
+  isAdvanced  Boolean @default(false) @map("is_advanced") @db.Bit(1)
+
+  question   Question @relation(fields: [questionId], references: [id])
+  questionId Int      @map("question_id")
+
+  selectedOptions SelectedOption[]
+
+  @@map("ai_option")
+}
+
+model SelectedOption {
+  id Int @id @default(autoincrement())
+
+  option   Option @relation(fields: [optionId], references: [id])
+  optionId Int    @map("option_id")
+
+  selection   Selection @relation(fields: [selectionId], references: [id])
+  selectionId Int       @map("selection_id")
+
+  chatGPTAnswer ChatGPTAnswer?
+
+  @@map("ai_selected_option")
+}
+
+model Selection {
+  id Int @id @default(autoincrement())
+
+  selectedOptions SelectedOption[]
+
+  @@map("ai_selection")
+}
+
+model ChatGPTAnswer {
+  id     Int     @id @default(autoincrement())
+  answer String  @map("chatgpt_answer") @db.LongText
+  status Boolean @default(true) @db.Bit(1)
+
+  selectedOption   SelectedOption @relation(fields: [selectedOptionId], references: [id])
+  selectedOptionId Int            @unique @map("selected_option_id")
+
+  @@map("chatgpt_answer")
 }
