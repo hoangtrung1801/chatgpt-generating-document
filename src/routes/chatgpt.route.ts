@@ -1,5 +1,5 @@
 import ChatGPTController from "@/controllers/chatgpt.controller";
-import { CreateQuestionDto } from "@/dtos/questions.dto";
+import { GenerateBriefAnswerDto } from "@/dtos/chatgpt.dto";
 import validationMiddleware from "@/middlewares/validation.middleware";
 import { Routes } from "@interfaces/routes.interface";
 import { Router } from "express";
@@ -17,8 +17,8 @@ class chatGPTRoute implements Routes {
     this.router.get(`${this.path}/briefs`, this.chatgptController.getBriefAnswers);
     this.router.get(`${this.path}/questions`, this.chatgptController.getQuestionAnswers);
 
-    this.router.post(`${this.path}/briefs`, this.chatgptController.generateBriefAnswer);
-    this.router.post(`${this.path}/questions`, this.chatgptController.getQuestionAnswers);
+    // this.router.post(`${this.path}/briefs`, validationMiddleware(GenerateBriefAnswerDto, "body"), this.chatgptController.generateBriefAnswer);
+    this.router.post(`${this.path}/questions`, this.chatgptController.generateQuestionAnswer);
 
     // this.router.get(`${this.path}`, this.questionController.getQuestions);
     // this.router.get(`${this.path}/:id(\\d+)`, this.questionController.getQuestionById);

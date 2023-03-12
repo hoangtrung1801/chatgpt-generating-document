@@ -1,9 +1,14 @@
-import { ChatGPTBriefAnswer, ChatGPTQuestionAnswer, PrismaClient } from "@prisma/client";
+import { GenerateBriefAnswerDto } from "@/dtos/chatgpt.dto";
+import { HttpException } from "@/exceptions/HttpException";
+import { chatGPTRequestBriefPrompt } from "@/utils/chatgpt-request";
+import { generateBriefPrompt } from "@/utils/generate-chatgpt-prompt";
+import { ChatGPTBriefAnswer, ChatGPTQuestionAnswer, Prisma, PrismaClient, Selection } from "@prisma/client";
 import { NextFunction, Request, Response } from "express";
 
 class ChatGPTController {
   public chatgptBrief = new PrismaClient().chatGPTBriefAnswer;
   public chatgptQuestion = new PrismaClient().chatGPTQuestionAnswer;
+  public selections = new PrismaClient().selection;
 
   public getBriefAnswers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
@@ -31,6 +36,55 @@ class ChatGPTController {
 
   public generateBriefAnswer = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
+      const generateBriefData: GenerateBriefAnswerDto = req.body;
+      const selectionId = generateBriefData.selectionId;
+
+      const findSelectionData = await this.selections.findUnique({
+        where: { id: selectionId },
+        include: {
+          selectedOptions: {
+            include: {
+              option: true,
+            },
+          },
+          category: true,
+        },
+      });
+      if (!findSelectionData) throw new HttpException(400, "SelectionId does not exist");
+
+      // get option names
+      const selectedOptionsData = findSelectionData.selectedOptions;
+      const optionNames = selectedOptionsData.map(selectedOption => selectedOption.option.name);
+
+      // get category name
+      const categoryData = findSelectionData.category;
+      const categoryName = categoryData.name;
+
+      const briefPrompt = generateBriefPrompt(categoryName, optionNames);
+      const chatGPTResponse = await chatGPTRequestBriefPrompt(briefPrompt);
+
+      const answer = chatGPTResponse.choices[0].message.content;
+
+      res.status(200).json({
+        data: answer,
+        message: "generate brief",
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public generateQuestionAnswer = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const briefPrompt = generateBriefPrompt("uber", ["payment", "shipping"]);
+      const chatGPTResponse = await chatGPTRequestBriefPrompt(briefPrompt);
+
+      const answer = chatGPTResponse.choices[0].message.content;
+
+      res.status(200).json({
+        data: answer,
+        message: "generate brief",
+      });
     } catch (error) {
       next(error);
     }

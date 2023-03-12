@@ -19,6 +19,8 @@ model Category {
 
   questions Question[]
 
+  selections Selection[]
+
   @@map("ai_category")
 }
 
@@ -71,6 +73,9 @@ model Selection {
   id Int @id @default(autoincrement())
 
   selectedOptions SelectedOption[]
+
+  category Category @relation(fields: [categoryId], references: [id])
+  categoryId Int @map("category_id") @default(3)
 
   @@map("ai_selection")
 }
