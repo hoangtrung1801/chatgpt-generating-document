@@ -1,11 +1,11 @@
-import { compare, hash } from 'bcrypt';
-import { sign } from 'jsonwebtoken';
-import { PrismaClient, User } from '@prisma/client';
-import { SECRET_KEY } from '@config';
-import { CreateUserDto } from '@dtos/users.dto';
-import { HttpException } from '@exceptions/HttpException';
-import { DataStoredInToken, TokenData } from '@interfaces/auth.interface';
-import { isEmpty } from '@utils/util';
+import { compare, hash } from "bcrypt";
+import { sign } from "jsonwebtoken";
+import { PrismaClient, User } from "@prisma/client";
+import { SECRET_KEY } from "@config";
+import { CreateUserDto } from "@dtos/users.dto";
+import { HttpException } from "@exceptions/HttpException";
+import { DataStoredInToken, TokenData } from "@interfaces/auth.interface";
+import { isEmpty } from "@utils/util";
 
 class AuthService {
   public users = new PrismaClient().user;

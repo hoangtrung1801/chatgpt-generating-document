@@ -34,14 +34,16 @@ model Question {
 
   options Option[]
 
+  chatGPTQuestionAnswer ChatGPTQuestionAnswer?
+
   @@map("ai_question")
 }
 
 model Option {
-  id          Int     @id @default(autoincrement())
-  name        String  @map("option_name")
-  description String  @map("option_description") @db.Text
-  isAdvanced  Boolean @default(false) @map("is_advanced") @db.Bit(1)
+  id          Int      @id @default(autoincrement())
+  name        String   @map("option_name")
+  description String?  @map("option_description") @db.Text
+  isAdvanced  Boolean? @default(false) @map("is_advanced") @db.Bit(1)
 
   question   Question @relation(fields: [questionId], references: [id])
   questionId Int      @map("question_id")
@@ -60,7 +62,7 @@ model SelectedOption {
   selection   Selection @relation(fields: [selectionId], references: [id])
   selectionId Int       @map("selection_id")
 
-  chatGPTAnswer ChatGPTAnswer?
+  chatGPTBriefAnswer ChatGPTBriefAnswer?
 
   @@map("ai_selected_option")
 }
@@ -73,13 +75,20 @@ model Selection {
   @@map("ai_selection")
 }
 
-model ChatGPTAnswer {
-  id     Int     @id @default(autoincrement())
-  answer String  @map("chatgpt_answer") @db.LongText
-  status Boolean @default(true) @db.Bit(1)
+model ChatGPTBriefAnswer {
+  id     Int    @id @default(autoincrement())
+  answer String @map("chatgpt_answer") @db.LongText
 
   selectedOption   SelectedOption @relation(fields: [selectedOptionId], references: [id])
   selectedOptionId Int            @unique @map("selected_option_id")
 
   @@map("chatgpt_answer")
+}
+
+model ChatGPTQuestionAnswer {
+  id     Int    @id @default(autoincrement())
+  answer String @map("chatgpt_question_answer") @db.LongText
+
+  question   Question @relation(fields: [questionId], references: [id])
+  questionId Int      @unique @map("chat_question_id_answer")
 }
