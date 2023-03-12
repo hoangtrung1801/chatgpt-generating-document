@@ -68,6 +68,7 @@ class SelectionsController {
       // });
 
       const selectionData: CreateSelectionDto = req.body;
+      console.log(selectionData);
       const createSelectionData = await this.seletions.create({
         data: {
           selectedOptions: {
@@ -75,6 +76,7 @@ class SelectionsController {
               data: selectionData.selectedOptions.map(optionId => ({ optionId })),
             },
           },
+          categoryId: selectionData.categoryId
         },
       });
 

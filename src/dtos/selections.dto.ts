@@ -5,4 +5,7 @@ export class CreateSelectionDto {
   @IsArray()
   @ArrayMinSize(1)
   selectedOptions: number[];
+
+  @IsInt()
+  categoryId: number;
 }

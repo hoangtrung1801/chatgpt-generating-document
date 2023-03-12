@@ -53,6 +53,7 @@ class QuestionsController {
           description: questionData.description,
           questionGPT: questionData.questionGPT,
           categoryId: questionData.categoryId,
+          type: questionData.type,
           options: {
             createMany: {
               data: optionsData,

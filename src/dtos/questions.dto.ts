@@ -15,6 +15,10 @@ export class CreateQuestionDto {
   @IsOptional()
   status: Boolean;
 
+  @IsString()
+  @IsOptional()
+  type: string;
+
   @IsInt()
   categoryId: number;
 

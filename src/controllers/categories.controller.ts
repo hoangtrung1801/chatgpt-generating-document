@@ -21,7 +21,12 @@ class CategoriesController {
       const categoryId = Number(req.params.id);
       if (isEmpty(categoryId)) throw new HttpException(400, "CategoryId is empty");
 
-      const findCategoryData: Category = await this.categories.findUnique({ where: { id: categoryId } });
+      const findCategoryData: Category = await this.categories.findUnique({
+        where: { id: categoryId },
+        include: {
+          questions: true,
+        },
+      });
 
       res.status(200).json({ data: findCategoryData, message: "findOne" });
     } catch (error) {
