@@ -44,7 +44,11 @@ class ChatGPTController {
         include: {
           selectedOptions: {
             include: {
-              option: true,
+              option: {
+                include: {
+                  question: true,
+                },
+              },
             },
           },
           category: true,
@@ -52,21 +56,42 @@ class ChatGPTController {
       });
       if (!findSelectionData) throw new HttpException(400, "SelectionId does not exist");
 
-      // get option names
+      // get questions
+      const selectedQuestions = {};
       const selectedOptionsData = findSelectionData.selectedOptions;
-      const optionNames = selectedOptionsData.map(selectedOption => selectedOption.option.name);
+      const optionsData = selectedOptionsData.map(obj => obj.option);
+
+      optionsData.forEach(option => {
+        if (!selectedQuestions[option.question.name]) {
+          selectedQuestions[option.question.name] = [option.name];
+        } else {
+          selectedQuestions[option.question.name] = [...selectedQuestions[option.question.name], option.name];
+        }
+      });
+
+      // console.log(selectedQuestions);
+      // const optionNames = selectedOptionsData.map(selectedOption => selectedOption.option.name);
 
       // get category name
       const categoryData = findSelectionData.category;
       const categoryName = categoryData.name;
 
-      const briefPrompt = generateBriefPrompt(categoryName, optionNames);
-      const chatGPTResponse = await chatGPTRequestBriefPrompt(briefPrompt);
+      const briefPrompt = generateBriefPrompt(categoryName, selectedQuestions);
 
+      const chatGPTResponse = await chatGPTRequestBriefPrompt(briefPrompt);
       const answer = chatGPTResponse.choices[0].message.content;
 
+      const chatgptAnswer = await this.chatgptBrief.create({
+        data: {
+          answer,
+          selectedOptionId: selectionId,
+        },
+      });
+
+      // const chatgptAnswer = {};
+
       res.status(200).json({
-        data: answer,
+        data: chatgptAnswer,
         message: "generate brief",
       });
     } catch (error) {

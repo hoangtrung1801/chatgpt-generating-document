@@ -1,4 +1,4 @@
-export function generateBriefPrompt(appName, features: string[]) {
+export function generateBriefPrompt(appName, features: object) {
   return `
   I would like to generate a requirement document of software development with some specs:
 
@@ -6,7 +6,9 @@ export function generateBriefPrompt(appName, features: string[]) {
   1.1. Purpose of project: make a app like ${appName}
 
   2. Product features:
-  ${features.map((feature, id) => `2.${id + 1}. ${feature}`).join("\n")}
+  ${Object.keys(features)
+    .map((key, id) => `2.${id + 1}. ${key}: ${features[key].join(", ")}`)
+    .join("\n")}
 
   3. Conclusion
 
