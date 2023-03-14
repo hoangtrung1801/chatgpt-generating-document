@@ -4,7 +4,7 @@ import validationMiddleware from "@/middlewares/validation.middleware";
 import { Routes } from "@interfaces/routes.interface";
 import { Router } from "express";
 
-class chatGPTRoute implements Routes {
+class ChatGPTRoute implements Routes {
   public path = "/chatgpt";
   public router = Router();
   public chatgptController = new ChatGPTController();
@@ -15,6 +15,7 @@ class chatGPTRoute implements Routes {
 
   private initializeRoutes() {
     this.router.get(`${this.path}/briefs`, this.chatgptController.getBriefAnswers);
+    this.router.get(`${this.path}/briefs/:id`, this.chatgptController.getBriefAnswerById);
     this.router.get(`${this.path}/questions`, this.chatgptController.getQuestionAnswers);
 
     this.router.post(`${this.path}/briefs`, validationMiddleware(GenerateBriefAnswerDto, "body"), this.chatgptController.generateBriefAnswer);
@@ -30,4 +31,4 @@ class chatGPTRoute implements Routes {
   }
 }
 
-export default chatGPTRoute;
+export default ChatGPTRoute;

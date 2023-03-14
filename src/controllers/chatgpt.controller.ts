@@ -22,6 +22,28 @@ class ChatGPTController {
     }
   };
 
+  public getBriefAnswerById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const briefId = Number(req.params.id);
+      const findBriefAnswer = await this.chatgptBrief.findUnique({
+        where: {
+          id: briefId,
+        },
+      });
+      res.status(200).json({
+        data: findBriefAnswer,
+        message: "find brief answer",
+      });
+      // const findAllBriefAnswers: ChatGPTBriefAnswer[] = await this.chatgptBrief.findMany();
+      // res.status(200).json({
+      //   data: findAllBriefAnswers,
+      //   message: "findAll",
+      // });
+    } catch (error) {
+      next(error);
+    }
+  };
+
   public getQuestionAnswers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const findAllQuestionAnswers: ChatGPTQuestionAnswer[] = await this.chatgptQuestion.findMany();
@@ -79,6 +101,7 @@ class ChatGPTController {
       const briefPrompt = generateBriefPrompt(categoryName, selectedQuestions);
 
       const chatGPTResponse = await chatGPTRequestBriefPrompt(briefPrompt);
+      console.log("chatGPTResponse", chatGPTResponse);
       const answer = chatGPTResponse.choices[0].message.content;
 
       const chatgptAnswer = await this.chatgptBrief.create({

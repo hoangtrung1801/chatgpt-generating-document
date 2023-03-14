@@ -8,7 +8,7 @@ import QuestionsRoute from "./routes/questions.route";
 import SelectionRoute from "./routes/selections.route";
 import SelectedOptionsRoute from "./routes/selected-options.route";
 import OptionsRoute from "./routes/options.route";
-import chatGPTRoute from "./routes/chatgpt.route";
+import ChatGPTRoute from "./routes/chatgpt.route";
 
 validateEnv();
 
@@ -21,7 +21,7 @@ const app = new App([
   new SelectionRoute(),
   new SelectedOptionsRoute(),
   new OptionsRoute(),
-  new chatGPTRoute(),
+  new ChatGPTRoute(),
 ]);
 
 app.listen();

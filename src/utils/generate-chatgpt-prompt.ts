@@ -1,7 +1,6 @@
-export function generateBriefPrompt(appName, features: object) {
+export function generateBriefPrompt(appName, features: { [key: string]: string[] }) {
   return `
   I would like to generate a requirement document of software development with some specs:
-
   1. Introduction
   1.1. Purpose of project: make a app like ${appName}
 
