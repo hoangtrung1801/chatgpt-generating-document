@@ -122,21 +122,22 @@ class ChatGPTController {
     }
   };
 
-  public generateQuestionAnswer = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      const briefPrompt = generateBriefPrompt("uber", ["payment", "shipping"]);
-      const chatGPTResponse = await chatGPTRequestBriefPrompt(briefPrompt);
+  // public generateQuestionAnswer = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  //   try {
+  //     const briefPrompt = generateBriefPrompt("uber", ["payment", "shipping"]);
 
-      const answer = chatGPTResponse.choices[0].message.content;
+  //     const chatGPTResponse = await chatGPTRequestBriefPrompt(briefPrompt);
 
-      res.status(200).json({
-        data: answer,
-        message: "generate brief",
-      });
-    } catch (error) {
-      next(error);
-    }
-  };
+  //     const answer = chatGPTResponse.choices[0].message.content;
+
+  //     res.status(200).json({
+  //       data: answer,
+  //       message: "generate brief",
+  //     });
+  //   } catch (error) {
+  //     next(error);
+  //   }
+  // };
 
   //   public questions = new PrismaClient().question;
   //   public options = new PrismaClient().option;
