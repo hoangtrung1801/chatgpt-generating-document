@@ -10,6 +10,18 @@ generator client {
   provider = "prisma-client-js"
 }
 
+model User {
+  id Int @id @default(autoincrement())
+  name String
+  email String
+  password String
+  created_at DateTime @db.Timestamp()
+
+  selections Selection[]
+
+  @@map("user")
+}
+
 model Category {
   id           Int     @id @default(autoincrement())
   name         String  @map("category_name")
@@ -32,7 +44,7 @@ model Question {
   status      Boolean @default(true) @db.Bit(1)
   type        String @default("")
 
-  category   Category @relation(fields: [categoryId], references: [id])
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   categoryId Int      @map("category_id")
 
   options Option[]
@@ -48,7 +60,7 @@ model Option {
   description String?  @map("option_description") @db.Text
   type        String @default("")
 
-  question   Question @relation(fields: [questionId], references: [id])
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
   questionId Int      @map("question_id")
 
   selectedOptions SelectedOption[]
@@ -59,10 +71,10 @@ model Option {
 model SelectedOption {
   id Int @id @default(autoincrement())
 
-  option   Option @relation(fields: [optionId], references: [id])
+  option   Option @relation(fields: [optionId], references: [id], onDelete: Cascade)
   optionId Int    @map("option_id")
 
-  selection   Selection @relation(fields: [selectionId], references: [id])
+  selection   Selection @relation(fields: [selectionId], references: [id], onDelete: Cascade)
   selectionId Int       @map("selection_id")
 
   chatGPTBriefAnswer ChatGPTBriefAnswer?
@@ -75,8 +87,11 @@ model Selection {
 
   selectedOptions SelectedOption[]
 
-  category   Category @relation(fields: [categoryId], references: [id])
-  categoryId Int      @default(3) @map("category_id")
+  category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  categoryId Int?      @default(3) @map("category_id")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId Int @map("user_id") @default(1)
 
   @@map("ai_selection")
 }
