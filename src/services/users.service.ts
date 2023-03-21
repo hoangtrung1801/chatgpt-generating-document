@@ -15,7 +15,12 @@ class UserService {
   public async findUserById(userId: number): Promise<User> {
     if (isEmpty(userId)) throw new HttpException(400, "UserId is empty");
 
-    const findUser: User = await this.users.findUnique({ where: { id: userId } });
+    const findUser: User = await this.users.findUnique({
+      where: { id: userId },
+      include: {
+        selections: true,
+      },
+    });
     if (!findUser) throw new HttpException(409, "User doesn't exist");
 
     return findUser;
@@ -24,11 +29,17 @@ class UserService {
   public async createUser(userData: CreateUserDto): Promise<User> {
     if (isEmpty(userData)) throw new HttpException(400, "userData is empty");
 
-    const findUser: User = await this.users.findUnique({ where: { email: userData.email } });
+    const findUser: User = await this.users.findFirst({ where: { email: userData.email } });
     if (findUser) throw new HttpException(409, `This email ${userData.email} already exists`);
 
     const hashedPassword = await hash(userData.password, 10);
-    const createUserData: User = await this.users.create({ data: { ...userData, password: hashedPassword } });
+    // const createUserData: User = await this.users.create({ data: { ...userData, password: hashedPassword } });
+    const createUserData: User = await this.users.create({
+      data: {
+        ...userData,
+        password: hashedPassword,
+      } as User,
+    });
     return createUserData;
   }
 
@@ -38,8 +49,8 @@ class UserService {
     const findUser: User = await this.users.findUnique({ where: { id: userId } });
     if (!findUser) throw new HttpException(409, "User doesn't exist");
 
-    const hashedPassword = await hash(userData.password, 10);
-    const updateUserData = await this.users.update({ where: { id: userId }, data: { ...userData, password: hashedPassword } });
+    // const hashedPassword = await hash(userData.password, 10);
+    const updateUserData = await this.users.update({ where: { id: userId }, data: { ...userData } });
     return updateUserData;
   }
 

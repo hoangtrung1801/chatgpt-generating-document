@@ -15,7 +15,7 @@ model User {
   name String
   email String
   password String
-  created_at DateTime @db.Timestamp()
+  created_at DateTime @default(now())
 
   selections Selection[]
 
@@ -100,7 +100,7 @@ model ChatGPTBriefAnswer {
   id     Int    @id @default(autoincrement())
   answer String @map("chatgpt_answer") @db.LongText
 
-  selectedOption   SelectedOption @relation(fields: [selectedOptionId], references: [id])
+  selectedOption   SelectedOption @relation(fields: [selectedOptionId], references: [id], onDelete: Cascade)
   selectedOptionId Int            @unique @map("selected_option_id")
 
   @@map("chatgpt_answer")
