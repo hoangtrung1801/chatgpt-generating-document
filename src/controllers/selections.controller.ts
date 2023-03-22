@@ -42,31 +42,6 @@ class SelectionsController {
 
   public createSelection = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      // const userData: CreateUserDto = req.body;
-      // const createUserData: User = await this.categoriesService.createUser(userData);
-
-      // res.status(201).json({ data: createQuestionData, message: "created" });
-
-      // const questionData: CreateQuestionDto = req.body;
-      // const optionsData = questionData.options;
-
-      // const createQuestionData: Question = await this.questions.create({
-      //   data: {
-      //     name: questionData.name,
-      //     description: questionData.description,
-      //     questionGPT: questionData.questionGPT,
-      //     categoryId: questionData.categoryId,
-      //     options: {
-      //       createMany: {
-      //         data: optionsData,
-      //       },
-      //     },
-      //   },
-      //   include: {
-      //     options: true,
-      //   },
-      // });
-
       const selectionData: CreateSelectionDto = req.body;
       console.log(selectionData);
       const createSelectionData = await this.seletions.create({
@@ -76,7 +51,7 @@ class SelectionsController {
               data: selectionData.selectedOptions.map(optionId => ({ optionId })),
             },
           },
-          categoryId: selectionData.categoryId
+          categoryId: selectionData.categoryId,
         },
       });
 

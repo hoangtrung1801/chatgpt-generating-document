@@ -11,10 +11,10 @@ generator client {
 }
 
 model User {
-  id Int @id @default(autoincrement())
-  name String
-  email String
-  password String
+  id         Int      @id @default(autoincrement())
+  name       String
+  email      String
+  password   String
   created_at DateTime @default(now())
 
   selections Selection[]
@@ -42,7 +42,7 @@ model Question {
   description String  @map("question_description") @db.Text
   questionGPT String  @map("question_gpt") @db.Text
   status      Boolean @default(true) @db.Bit(1)
-  type        String @default("")
+  type        String  @default("")
 
   category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   categoryId Int      @map("category_id")
@@ -55,10 +55,10 @@ model Question {
 }
 
 model Option {
-  id          Int      @id @default(autoincrement())
-  name        String   @map("option_name")
-  description String?  @map("option_description") @db.Text
-  type        String @default("")
+  id          Int     @id @default(autoincrement())
+  name        String  @map("option_name")
+  description String? @map("option_description") @db.Text
+  type        String  @default("")
 
   question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
   questionId Int      @map("question_id")
@@ -83,15 +83,17 @@ model SelectedOption {
 }
 
 model Selection {
-  id Int @id @default(autoincrement())
+  id          Int    @id @default(autoincrement())
+  title       String
+  description String @db.Text
 
   selectedOptions SelectedOption[]
 
   category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   categoryId Int?      @default(3) @map("category_id")
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId Int @map("user_id") @default(1)
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId Int  @default(1) @map("user_id")
 
   @@map("ai_selection")
 }
