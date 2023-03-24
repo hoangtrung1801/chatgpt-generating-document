@@ -2,7 +2,7 @@ import { GenerateBriefAnswerDto } from "@/dtos/chatgpt.dto";
 import { HttpException } from "@/exceptions/HttpException";
 import { chatGPTRequestBriefPrompt } from "@/utils/chatgpt-request";
 import { generateBriefPrompt } from "@/utils/generate-chatgpt-prompt";
-import { ChatGPTBriefAnswer, ChatGPTQuestionAnswer, Prisma, PrismaClient, Selection } from "@prisma/client";
+import { ChatGPTBriefAnswer, ChatGPTQuestionAnswer, PrismaClient, Selection } from "@prisma/client";
 import { NextFunction, Request, Response } from "express";
 
 class ChatGPTController {
@@ -13,9 +13,10 @@ class ChatGPTController {
   public getBriefAnswers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const findAllBriefAnswers: ChatGPTBriefAnswer[] = await this.chatgptBrief.findMany();
+
       res.status(200).json({
         data: findAllBriefAnswers,
-        message: "findAll",
+        message: "found all",
       });
     } catch (error) {
       next(error);
@@ -30,15 +31,11 @@ class ChatGPTController {
           id: briefId,
         },
       });
+
       res.status(200).json({
         data: findBriefAnswer,
-        message: "find brief answer",
+        message: "found brief answer",
       });
-      // const findAllBriefAnswers: ChatGPTBriefAnswer[] = await this.chatgptBrief.findMany();
-      // res.status(200).json({
-      //   data: findAllBriefAnswers,
-      //   message: "findAll",
-      // });
     } catch (error) {
       next(error);
     }
@@ -59,8 +56,8 @@ class ChatGPTController {
   public generateBriefAnswer = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const generateBriefData: GenerateBriefAnswerDto = req.body;
-      const selectionId = generateBriefData.selectionId;
 
+      const selectionId = generateBriefData.selectionId;
       const findSelectionData = await this.selections.findUnique({
         where: { id: selectionId },
         include: {
@@ -80,6 +77,7 @@ class ChatGPTController {
 
       // get questions
       const selectedQuestions = {};
+
       const selectedOptionsData = findSelectionData.selectedOptions;
       const optionsData = selectedOptionsData.map(obj => obj.option);
 
@@ -90,9 +88,6 @@ class ChatGPTController {
           selectedQuestions[option.question.name] = [...selectedQuestions[option.question.name], option.name];
         }
       });
-
-      // console.log(selectedQuestions);
-      // const optionNames = selectedOptionsData.map(selectedOption => selectedOption.option.name);
 
       // get category name
       const categoryData = findSelectionData.category;
@@ -107,7 +102,7 @@ class ChatGPTController {
       const chatgptAnswer = await this.chatgptBrief.create({
         data: {
           answer,
-          selectedOptionId: selectionId,
+          selectionId,
         },
       });
 
