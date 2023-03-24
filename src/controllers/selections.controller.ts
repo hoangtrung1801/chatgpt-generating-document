@@ -43,17 +43,21 @@ class SelectionsController {
   public createSelection = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const selectionData: CreateSelectionDto = req.body;
-      console.log(selectionData);
       const createSelectionData = await this.seletions.create({
         data: {
+          ...selectionData,
           selectedOptions: {
             createMany: {
               data: selectionData.selectedOptions.map(optionId => ({ optionId })),
             },
           },
-          categoryId: selectionData.categoryId,
+
+          // CHANGE THIS
+          userId: 2,
         },
       });
+
+      if (!createSelectionData) throw new HttpException(400, "Cannot create selection");
 
       res.status(201).json({
         data: createSelectionData,

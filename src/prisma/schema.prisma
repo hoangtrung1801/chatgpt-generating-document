@@ -77,8 +77,6 @@ model SelectedOption {
   selection   Selection @relation(fields: [selectionId], references: [id], onDelete: Cascade)
   selectionId Int       @map("selection_id")
 
-  chatGPTBriefAnswer ChatGPTBriefAnswer?
-
   @@map("ai_selected_option")
 }
 
@@ -95,6 +93,8 @@ model Selection {
   user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId Int  @default(1) @map("user_id")
 
+  chatGPTBriefAnswer ChatGPTBriefAnswer?
+
   @@map("ai_selection")
 }
 
@@ -102,8 +102,8 @@ model ChatGPTBriefAnswer {
   id     Int    @id @default(autoincrement())
   answer String @map("chatgpt_answer") @db.LongText
 
-  selectedOption   SelectedOption @relation(fields: [selectedOptionId], references: [id], onDelete: Cascade)
-  selectedOptionId Int            @unique @map("selected_option_id")
+  selection Selection @relation(fields: [selectionId], references: [id], onDelete: Cascade)
+  selectionId Int @unique @map("selection_id")
 
   @@map("chatgpt_answer")
 }
