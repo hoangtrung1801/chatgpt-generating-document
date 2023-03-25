@@ -1,4 +1,6 @@
 import OptionsController from "@/controllers/options.controller";
+import { CreateOptionDto } from "@/dtos/option.dto";
+import validationMiddleware from "@/middlewares/validation.middleware";
 import { Routes } from "@interfaces/routes.interface";
 import { Router } from "express";
 
@@ -12,7 +14,11 @@ class OptionsRoute implements Routes {
   }
 
   private initializeRoutes() {
-    this.router.get(`${this.path}`, this.optionsController.getQuestions);
+    this.router.get(`${this.path}`, this.optionsController.getOptions);
+    // this.router.post(`${this.path}`, this.optionsController.createOptions);
+    this.router.put(`${this.path}/:id(\\d+)`, validationMiddleware(CreateOptionDto, "body", true), this.optionsController.updateOption);
+    this.router.put(`${this.path}/:id(\\d+)`, this.optionsController.deleteOption);
+
     // this.router.get(`${this.path}/:id(\\d+)`, this.optionsController.getQuestionById);
     // // this.router.post(`${this.path}`, validationMiddleware(CreateUserDto, "body"), this.usersController.createCategory);
     // this.router.post(`${this.path}`, validationMiddleware(CreateQuestionDto, "body"), this.optionsController.createQuestion);

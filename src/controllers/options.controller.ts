@@ -1,14 +1,51 @@
+import { HttpException } from "@/exceptions/HttpException";
 import { Option, PrismaClient } from "@prisma/client";
 import { NextFunction, Request, Response } from "express";
 
 class OptionsController {
   public options = new PrismaClient().option;
 
-  public getQuestions = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public getOptions = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const findAllOptionsData: Option[] = await this.options.findMany();
 
-      res.status(200).json({ data: findAllOptionsData, message: "findAll" });
+      res.status(200).json({ data: findAllOptionsData, message: "found all options" });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public updateOption = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const optionId = Number(req.params.id);
+      const optionData: Partial<Option> = req.body;
+
+      const findOption = await this.options.findUnique({ where: { id: optionId } });
+      if (!findOption) throw new HttpException(400, "Options does not exist");
+
+      const updateOptionData = await this.options.update({
+        where: {
+          id: optionId,
+        },
+        data: optionData,
+      });
+
+      res.status(200).json({ data: updateOptionData, message: "updated option" });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public deleteOption = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const optionId = Number(req.params.id);
+
+      const findOption = await this.options.findUnique({ where: { id: optionId } });
+      if (!findOption) throw new HttpException(409, "Option does not exist");
+
+      const deleteOptionData = await this.options.delete({ where: { id: optionId } });
+
+      res.status(200).json({ data: deleteOptionData, message: "deleted option" });
     } catch (error) {
       next(error);
     }
