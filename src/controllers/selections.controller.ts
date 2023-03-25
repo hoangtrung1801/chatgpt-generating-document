@@ -68,38 +68,43 @@ class SelectionsController {
     }
   };
 
-  //   public updateQuestion = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  //     try {
-  //       const questionId = Number(req.params.id);
-  //       const questionData: Partial<Question> = req.body;
-  //       // const updateUserData: Question = await this.categoriesService.updateUser(categoryId, categoryData);
-  //       const updateQuestionData: Question = await this.questions.update({
-  //         where: {
-  //           id: questionId,
-  //         },
-  //         data: questionData,
-  //       });
+  public updateSelection = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const selectionId = Number(req.params.id);
+      const findSelectionData = await this.seletions.findUnique({ where: { id: selectionId } });
+      if (!findSelectionData) throw new HttpException(400, "Selection does not exist");
 
-  //       res.status(200).json({ data: updateQuestionData, message: "updated" });
-  //     } catch (error) {
-  //       next(error);
-  //     }
-  //   };
+      const selectionData: Partial<CreateSelectionDto> = req.body;
 
-  //   public deleteQuestion = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  //     try {
-  //       const questionId = Number(req.params.id);
+      const updateSelectionData = await this.seletions.update({
+        where: {
+          id: selectionId,
+        },
+        data: {
+          ...(selectionData as Selection),
+        },
+      });
 
-  //       const findQuestion = await this.questions.findUnique({ where: { id: questionId } });
-  //       if (!findQuestion) throw new HttpException(409, "Question does not exist");
+      res.status(200).json({ data: updateSelectionData, message: "updated selection" });
+    } catch (error) {
+      next(error);
+    }
+  };
 
-  //       const deleteQuestionData: Question = await this.questions.delete({ where: { id: questionId } });
+  public deleteSelection = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const selectionId = Number(req.params.id);
 
-  //       res.status(200).json({ data: deleteQuestionData, message: "deleted" });
-  //     } catch (error) {
-  //       next(error);
-  //     }
-  //   };
+      const findSelection = await this.seletions.findUnique({ where: { id: selectionId } });
+      if (!findSelection) throw new HttpException(409, "Selection does not exist");
+
+      const deleteQuestionData = await this.seletions.delete({ where: { id: selectionId } });
+
+      res.status(200).json({ data: deleteQuestionData, message: "deleted" });
+    } catch (error) {
+      next(error);
+    }
+  };
 }
 
 export default SelectionsController;
