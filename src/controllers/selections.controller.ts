@@ -6,6 +6,7 @@ import { NextFunction, Request, Response } from "express";
 
 class SelectionsController {
   public seletions = new PrismaClient().selection;
+  public users = new PrismaClient().user;
 
   public getSelections = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
@@ -35,6 +36,27 @@ class SelectionsController {
       if (!findSelectionData) throw new HttpException(400, "SelectionId does not exist");
 
       res.status(200).json({ data: findSelectionData, message: "findOne" });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public getCurrentUserSelections = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const userId = 2;
+      const findUser = await this.users.findUnique({
+        where: { id: userId },
+        include: {
+          selections: true,
+        },
+      });
+
+      if (!findUser) throw new HttpException(400, "User does not exist");
+
+      res.status(201).json({
+        data: findUser,
+        message: "get current user's selections",
+      });
     } catch (error) {
       next(error);
     }

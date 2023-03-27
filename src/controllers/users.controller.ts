@@ -1,7 +1,7 @@
-import { NextFunction, Request, Response } from "express";
-import { User } from "@prisma/client";
 import { CreateUserDto } from "@dtos/users.dto";
+import { User } from "@prisma/client";
 import userService from "@services/users.service";
+import { NextFunction, Request, Response } from "express";
 
 class UsersController {
   public userService = new userService();

@@ -16,6 +16,9 @@ class SelectionRoute implements Routes {
   private initializeRoutes() {
     this.router.get(`${this.path}`, this.seletionsController.getSelections);
     this.router.get(`${this.path}/:id(\\d+)`, this.seletionsController.getSelectionById);
+
+    this.router.get(`${this.path}/current-user`, this.seletionsController.getCurrentUserSelections);
+
     this.router.post(`${this.path}`, validationMiddleware(CreateSelectionDto, "body"), this.seletionsController.createSelection);
     this.router.put(`${this.path}/:id(\\d+)`, validationMiddleware(CreateSelectionDto, "body", true), this.seletionsController.updateSelection);
     this.router.delete(`${this.path}/:id(\\d+)`, this.seletionsController.deleteSelection);
