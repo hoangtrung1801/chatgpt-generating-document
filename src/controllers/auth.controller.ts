@@ -41,6 +41,14 @@ class AuthController {
       next(error);
     }
   };
+
+  public checkAuth = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+    try {
+      res.status(200).json({ data: req.user, message: "checkAuth" });
+    } catch (error) {
+      next(error);
+    }
+  };
 }
 
 export default AuthController;

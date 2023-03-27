@@ -13,7 +13,7 @@ generator client {
 model User {
   id         Int      @id @default(autoincrement())
   name       String
-  email      String
+  email      String   @unique
   password   String
   created_at DateTime @default(now())
 
@@ -102,8 +102,8 @@ model ChatGPTBriefAnswer {
   id     Int    @id @default(autoincrement())
   answer String @map("chatgpt_answer") @db.LongText
 
-  selection Selection @relation(fields: [selectionId], references: [id], onDelete: Cascade)
-  selectionId Int @unique @map("selection_id")
+  selection   Selection @relation(fields: [selectionId], references: [id], onDelete: Cascade)
+  selectionId Int       @unique @map("selection_id")
 
   @@map("chatgpt_answer")
 }
