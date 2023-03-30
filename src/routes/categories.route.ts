@@ -1,5 +1,5 @@
 import CategoriesController from "@/controllers/categories.controller";
-import validationMiddleware from "@/middlewares/validation.middleware";
+import authMiddleware from "@/middlewares/auth.middleware";
 import { Routes } from "@interfaces/routes.interface";
 import { Router } from "express";
 
@@ -13,6 +13,8 @@ class CategoriesRoute implements Routes {
   }
 
   private initializeRoutes() {
+    this.router.use(`${this.path}`, authMiddleware);
+
     this.router.get(`${this.path}`, this.usersController.getCategories);
     this.router.get(`${this.path}/:id(\\d+)`, this.usersController.getCategoryById);
     // this.router.post(`${this.path}`, validationMiddleware(CreateUserDto, "body"), this.usersController.createCategory);

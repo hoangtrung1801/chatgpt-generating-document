@@ -1,5 +1,6 @@
 import SelectionsController from "@/controllers/selections.controller";
 import { CreateSelectionDto } from "@/dtos/selections.dto";
+import authMiddleware from "@/middlewares/auth.middleware";
 import validationMiddleware from "@/middlewares/validation.middleware";
 import { Routes } from "@interfaces/routes.interface";
 import { Router } from "express";
@@ -14,6 +15,8 @@ class SelectionRoute implements Routes {
   }
 
   private initializeRoutes() {
+    this.router.use(`/${this.path}`, authMiddleware);
+
     this.router.get(`${this.path}`, this.seletionsController.getSelections);
     this.router.get(`${this.path}/:id(\\d+)`, this.seletionsController.getSelectionById);
 

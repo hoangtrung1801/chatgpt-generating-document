@@ -1,4 +1,5 @@
 import SelectedOptionsController from "@/controllers/selected-options.controller";
+import authMiddleware from "@/middlewares/auth.middleware";
 import { Routes } from "@interfaces/routes.interface";
 import { Router } from "express";
 
@@ -12,7 +13,9 @@ class SelectedOptionsRoute implements Routes {
   }
 
   private initializeRoutes() {
+    this.router.use(`${this.path}`, authMiddleware);
     this.router.get(`${this.path}`, this.selectedOptionsController.getSelectedOptions);
+
     // this.router.get(`${this.path}/:id(\\d+)`, this.selectedOptionsController.getSelectionById);
     // this.router.post(`${this.path}`, validationMiddleware(CreateUserDto, "body"), this.usersController.createCategory);
     // this.router.post(`${this.path}`, validationMiddleware(CreateQuestionDto, "body"), this.questionController.createQuestion);
