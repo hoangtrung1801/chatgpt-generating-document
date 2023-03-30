@@ -1,14 +1,32 @@
 import { GenerateBriefAnswerDto } from "@/dtos/chatgpt.dto";
 import { HttpException } from "@/exceptions/HttpException";
+import ChatGPTService from "@/services/chatgpt.service";
 import { chatGPTRequestBriefPrompt } from "@/utils/chatgpt-request";
 import { generateBriefPrompt } from "@/utils/generate-chatgpt-prompt";
-import { ChatGPTBriefAnswer, ChatGPTQuestionAnswer, PrismaClient, Selection } from "@prisma/client";
+import { jiraPushTask } from "@/utils/jira-reqests";
+import { ChatGPTBriefAnswer, ChatGPTQuestionAnswer, PrismaClient } from "@prisma/client";
 import { NextFunction, Request, Response } from "express";
 
 class ChatGPTController {
   public chatgptBrief = new PrismaClient().chatGPTBriefAnswer;
   public chatgptQuestion = new PrismaClient().chatGPTQuestionAnswer;
   public selections = new PrismaClient().selection;
+
+  public chatgptService = new ChatGPTService();
+
+  public test = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      await this.chatgptService.test();
+
+      res.status(200).json({
+        data: {},
+        message: "found all",
+      });
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  };
 
   public getBriefAnswers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
@@ -93,24 +111,47 @@ class ChatGPTController {
       const categoryData = findSelectionData.category;
       const categoryName = categoryData.name;
 
-      const briefPrompt = generateBriefPrompt(categoryName, selectedQuestions);
+      const briefPrompt = generateBriefPrompt({
+        softwareName: findSelectionData.title,
+        description: findSelectionData.description,
+        features: Object.keys(selectedQuestions),
+      });
 
       const chatGPTResponse = await chatGPTRequestBriefPrompt(briefPrompt);
-      console.log("chatGPTResponse", chatGPTResponse);
       const answer = chatGPTResponse.choices[0].message.content;
+
+      console.log("chatGPTResponse", answer);
 
       const chatgptAnswer = await this.chatgptBrief.create({
         data: {
           answer,
           selectionId,
+          prompt: briefPrompt,
         },
       });
 
-      // const chatgptAnswer = {};
-
       res.status(200).json({
         data: chatgptAnswer,
+        // data: {},
         message: "generate brief",
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public generateTodoList = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const briefId = Number(req.params.id);
+
+      const todos = await this.chatgptService.generateTodoList(briefId);
+      const responses = await Promise.all(todos.map(todo => jiraPushTask(todo)));
+
+      const data = responses.map(res => res.data);
+
+      res.status(200).json({
+        data,
+        message: "generated todo list",
       });
     } catch (error) {
       next(error);

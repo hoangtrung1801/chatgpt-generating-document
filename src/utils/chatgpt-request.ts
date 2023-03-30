@@ -27,7 +27,7 @@ export const chatGPTRequestBriefPrompt = async (briefPrompt: string) => {
   const response = await chatGPTRequest([
     {
       role: "system",
-      content: "You are a document generator",
+      content: "You are expert in making software requirement document",
     },
     {
       role: "user",
@@ -41,11 +41,34 @@ export const chatGPTRequestQuestionPrompt = async (briefPrompt: string) => {
   const response = await chatGPTRequest([
     {
       role: "system",
-      content: "You are a document generator",
+      content: "You are expert in making software requirement document",
     },
     {
       role: "user",
       content: briefPrompt,
+    },
+  ]);
+  return response.data;
+};
+
+export const chatGPTRequestTodoListPrompt = async (briefPrompt: string, answeredBrief: string) => {
+  const response = await chatGPTRequest([
+    {
+      role: "system",
+      content: "You are expert in making software requirement document",
+    },
+    {
+      role: "user",
+      content: briefPrompt,
+    },
+    {
+      role: "assistant",
+      content: answeredBrief,
+    },
+    {
+      role: "user",
+      content:
+        "Base on the generated document, list todos I need do into list items. Your answer should only consist todo items, start with character '+'",
     },
   ]);
   return response.data;

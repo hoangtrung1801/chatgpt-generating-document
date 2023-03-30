@@ -14,11 +14,14 @@ class ChatGPTRoute implements Routes {
   }
 
   private initializeRoutes() {
+    this.router.get(`${this.path}`, this.chatgptController.test);
+
     this.router.get(`${this.path}/briefs`, this.chatgptController.getBriefAnswers);
     this.router.get(`${this.path}/briefs/:id`, this.chatgptController.getBriefAnswerById);
     this.router.get(`${this.path}/questions`, this.chatgptController.getQuestionAnswers);
 
     this.router.post(`${this.path}/briefs`, validationMiddleware(GenerateBriefAnswerDto, "body"), this.chatgptController.generateBriefAnswer);
+    this.router.post(`${this.path}/briefs/:id/tasks`, this.chatgptController.generateTodoList);
     // this.router.post(`${this.path}/questions`, this.chatgptController.generateQuestionAnswer);
 
     // this.router.get(`${this.path}`, this.questionController.getQuestions);

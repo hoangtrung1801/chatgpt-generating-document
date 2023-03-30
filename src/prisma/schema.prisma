@@ -41,6 +41,7 @@ model Question {
   name        String  @map("question_name")
   description String  @map("question_description") @db.Text
   questionGPT String  @map("question_gpt") @db.Text
+  keyword     String  @default("") @map("question_keyword")
   status      Boolean @default(true) @db.Bit(1)
   type        String  @default("")
 
@@ -99,8 +100,9 @@ model Selection {
 }
 
 model ChatGPTBriefAnswer {
-  id     Int    @id @default(autoincrement())
-  answer String @map("chatgpt_answer") @db.LongText
+  id              Int     @id @default(autoincrement())
+  answer          String  @map("chatgpt_answer") @db.LongText
+  prompt String? @map("chatgpt_prompt") @db.LongText
 
   selection   Selection @relation(fields: [selectionId], references: [id], onDelete: Cascade)
   selectionId Int       @unique @map("selection_id")

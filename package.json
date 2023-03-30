@@ -37,6 +37,7 @@
     "hpp": "^0.2.3",
     "jsonwebtoken": "^8.5.1",
     "morgan": "^1.10.0",
+    "openai": "^3.2.1",
     "ra-input-rich-text": "^4.8.2",
     "swagger-jsdoc": "^6.2.1",
     "swagger-ui-express": "^4.5.0",
