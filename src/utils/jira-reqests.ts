@@ -28,7 +28,7 @@ export const jiraPushTask = async (task: string) => {
       },
     );
 
-    return response;
+    return response.data;
   } catch (error) {
     return error;
   }

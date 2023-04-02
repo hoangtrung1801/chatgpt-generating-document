@@ -1,6 +1,7 @@
 import { GenerateBriefAnswerDto } from "@/dtos/chatgpt.dto";
 import { HttpException } from "@/exceptions/HttpException";
 import ChatGPTService from "@/services/chatgpt.service";
+import TaskService from "@/services/tasks.service";
 import { chatGPTRequestBriefPrompt } from "@/utils/chatgpt-request";
 import { generateBriefPrompt } from "@/utils/generate-chatgpt-prompt";
 import { jiraPushTask } from "@/utils/jira-reqests";
@@ -13,6 +14,7 @@ class ChatGPTController {
   public selections = new PrismaClient().selection;
 
   public chatgptService = new ChatGPTService();
+  public todoService = new TaskService();
 
   public test = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -140,18 +142,25 @@ class ChatGPTController {
     }
   };
 
-  public generateTodoList = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public generateTaskList = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const briefId = Number(req.params.id);
+      const brief = await this.chatgptService.getBriefById(briefId);
+
+      if (!brief) throw new HttpException(400, "Brief does not exist");
 
       const todos = await this.chatgptService.generateTodoList(briefId);
-      const responses = await Promise.all(todos.map(todo => jiraPushTask(todo)));
 
-      const data = responses.map(res => res.data);
+      const responses = await Promise.all([
+        ...todos.map(todo => this.todoService.addTask(todo, brief.selectionId)),
+        ...todos.map(todo => jiraPushTask(todo)),
+      ]);
+
+      const tasksData = responses.slice(0, responses.length / 2);
 
       res.status(200).json({
-        data,
-        message: "generated todo list",
+        data: tasksData,
+        message: "generated tasks list",
       });
     } catch (error) {
       next(error);

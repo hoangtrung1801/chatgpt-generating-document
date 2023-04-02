@@ -1,7 +1,6 @@
 import { chatGPTRequestTodoListPrompt } from "@/utils/chatgpt-request";
-import { jiraPushTask } from "@/utils/jira-reqests";
 import { PrismaClient } from "@prisma/client";
-import axios from "axios";
+import { isEmpty } from "class-validator";
 
 class ChatGPTService {
   public chatgptBrief = new PrismaClient().chatGPTBriefAnswer;
@@ -57,6 +56,15 @@ class ChatGPTService {
     // console.log("response", (await jiraPushTask("test 123456")).data);
   }
 
+  public async getBriefById(briefId: number) {
+    const findBrief = await this.chatgptBrief.findUnique({
+      where: {
+        id: briefId,
+      },
+    });
+    return findBrief;
+  }
+
   public async generateTodoList(briefId: number): Promise<string[]> {
     const findBrief = await this.chatgptBrief.findUnique({
       where: {
@@ -69,7 +77,10 @@ class ChatGPTService {
     const response = await chatGPTRequestTodoListPrompt(briefPrompt, answeredBrief);
     const responseContent: string = response.choices[0].message.content;
 
-    const todos = responseContent.split("+").map((e: string) => e.replace("\n", "").trim());
+    const todos = responseContent
+      .split("+")
+      .map((e: string) => e.replace("\n", "").trim())
+      .filter(e => !isEmpty(e));
     return todos;
   }
 }

@@ -94,14 +94,27 @@ model Selection {
   user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId Int  @default(1) @map("user_id")
 
+  todos Task[]
+
   chatGPTBriefAnswer ChatGPTBriefAnswer?
 
   @@map("ai_selection")
 }
 
+model Task {
+  id     Int        @id @default(autoincrement())
+  title  String
+  status TodoStatus @default(in)
+
+  selection   Selection @relation(fields: [selectionId], references: [id], onDelete: Cascade)
+  selectionId Int       @map("selection_id")
+
+  @@map("task")
+}
+
 model ChatGPTBriefAnswer {
-  id              Int     @id @default(autoincrement())
-  answer          String  @map("chatgpt_answer") @db.LongText
+  id     Int     @id @default(autoincrement())
+  answer String  @map("chatgpt_answer") @db.LongText
   prompt String? @map("chatgpt_prompt") @db.LongText
 
   selection   Selection @relation(fields: [selectionId], references: [id], onDelete: Cascade)
@@ -118,4 +131,10 @@ model ChatGPTQuestionAnswer {
   questionId Int      @unique @map("chat_question_id_answer")
 
   @@map("chatgpt_question_answer")
+}
+
+enum TodoStatus {
+  in
+  in_progress
+  done
 }
