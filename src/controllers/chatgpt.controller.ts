@@ -1,5 +1,6 @@
 import { GenerateBriefAnswerDto } from "@/dtos/chatgpt.dto";
 import { HttpException } from "@/exceptions/HttpException";
+import { RequestWithUser } from "@/interfaces/auth.interface";
 import ChatGPTService from "@/services/chatgpt.service";
 import UserStoryService from "@/services/user-story.service";
 import { chatGPTRequestBriefPrompt } from "@/utils/chatgpt-request";
@@ -30,9 +31,11 @@ class ChatGPTController {
     }
   };
 
-  public getBriefAnswers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public getBriefAnswers = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const findAllBriefAnswers: ChatGPTBriefAnswer[] = await this.chatgptBrief.findMany();
+      const user = req.user;
+      const findAllBriefAnswers: ChatGPTBriefAnswer[] = await this.chatgptService.getBriefsOfUser(user.id);
+      console.log(user, findAllBriefAnswers);
 
       res.status(200).json({
         data: findAllBriefAnswers,
