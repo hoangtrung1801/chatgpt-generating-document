@@ -1,6 +1,7 @@
 import { CreateSelectionDto } from "@/dtos/selections.dto";
 import { UpdateStoryDto } from "@/dtos/user-story.dto";
 import { HttpException } from "@/exceptions/HttpException";
+import { RequestWithUser } from "@/interfaces/auth.interface";
 import SelectionService from "@/services/selections.service";
 import UserStoryService from "@/services/user-story.service";
 import { isEmpty } from "@/utils/util";
@@ -47,21 +48,13 @@ class SelectionsController {
     }
   };
 
-  public getCurrentUserSelections = async (req: Request, res: Response, next: NextFunction) => {
+  public getCurrentUserSelections = async (req: RequestWithUser, res: Response, next: NextFunction) => {
     try {
-      const userId = 8;
-      const findUser = await this.users.findUnique({
-        where: { id: userId },
-        include: {
-          selections: true,
-        },
-      });
-
-      if (!findUser) throw new HttpException(400, "User does not exist");
-      const findSelections = findUser.selections;
+      const user = req.user;
+      const findCurrentUserSelections = await this.selectionService.findCurrentUserSelections(user.id);
 
       res.status(201).json({
-        data: findSelections,
+        data: findCurrentUserSelections,
         message: "get current user's selections",
       });
     } catch (error) {

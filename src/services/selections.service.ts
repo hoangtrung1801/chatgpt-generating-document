@@ -12,6 +12,16 @@ class SelectionService {
     if (!findSelection) throw new HttpException(400, "Selection does not exist");
     return findSelection;
   };
+
+  public findCurrentUserSelections = async (userId: number) => {
+    const findCurrentUserSelections = await this.selections.findMany({
+      where: {
+        userId,
+      },
+    });
+
+    return findCurrentUserSelections;
+  };
 }
 
 export default SelectionService;
