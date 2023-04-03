@@ -94,22 +94,22 @@ model Selection {
   user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId Int  @default(1) @map("user_id")
 
-  todos Task[]
+  userStories UserStory[]
 
   chatGPTBriefAnswer ChatGPTBriefAnswer?
 
   @@map("ai_selection")
 }
 
-model Task {
+model UserStory {
   id     Int        @id @default(autoincrement())
   title  String
-  status TodoStatus @default(in)
+  status UserStoryStatus @default(IN)
 
   selection   Selection @relation(fields: [selectionId], references: [id], onDelete: Cascade)
   selectionId Int       @map("selection_id")
 
-  @@map("task")
+  @@map("ai_user_story")
 }
 
 model ChatGPTBriefAnswer {
@@ -133,8 +133,10 @@ model ChatGPTQuestionAnswer {
   @@map("chatgpt_question_answer")
 }
 
-enum TodoStatus {
-  in
-  in_progress
-  done
+enum UserStoryStatus {
+  IN
+  IN_PROGRESS
+  IN_REVIEW
+  DONE
+	@@map("user_story_status")
 }

@@ -1,10 +1,10 @@
 import { GenerateBriefAnswerDto } from "@/dtos/chatgpt.dto";
 import { HttpException } from "@/exceptions/HttpException";
 import ChatGPTService from "@/services/chatgpt.service";
-import TaskService from "@/services/tasks.service";
+import UserStoryService from "@/services/user-story.service";
 import { chatGPTRequestBriefPrompt } from "@/utils/chatgpt-request";
 import { generateBriefPrompt } from "@/utils/generate-chatgpt-prompt";
-import { jiraPushTask } from "@/utils/jira-reqests";
+import { jiraPushUserStory } from "@/utils/jira-reqests";
 import { ChatGPTBriefAnswer, ChatGPTQuestionAnswer, PrismaClient } from "@prisma/client";
 import { NextFunction, Request, Response } from "express";
 
@@ -14,7 +14,7 @@ class ChatGPTController {
   public selections = new PrismaClient().selection;
 
   public chatgptService = new ChatGPTService();
-  public todoService = new TaskService();
+  public userStoryService = new UserStoryService();
 
   public test = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -142,25 +142,25 @@ class ChatGPTController {
     }
   };
 
-  public generateTaskList = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public generateUserStoryList = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const briefId = Number(req.params.id);
       const brief = await this.chatgptService.getBriefById(briefId);
 
       if (!brief) throw new HttpException(400, "Brief does not exist");
 
-      const todos = await this.chatgptService.generateTodoList(briefId);
+      const userStories = await this.chatgptService.generateUserStoryList(briefId);
 
       const responses = await Promise.all([
-        ...todos.map(todo => this.todoService.addTask(todo, brief.selectionId)),
-        ...todos.map(todo => jiraPushTask(todo)),
+        ...userStories.map(todo => this.userStoryService.addUserStory(todo, brief.selectionId)),
+        ...userStories.map(todo => jiraPushUserStory(todo)),
       ]);
 
-      const tasksData = responses.slice(0, responses.length / 2);
+      const userStoriesData = responses.slice(0, responses.length / 2);
 
       res.status(200).json({
-        data: tasksData,
-        message: "generated tasks list",
+        data: userStoriesData,
+        message: "generated user story list",
       });
     } catch (error) {
       next(error);

@@ -1,5 +1,8 @@
 import { CreateSelectionDto } from "@/dtos/selections.dto";
+import { UpdateStoryDto } from "@/dtos/user-story.dto";
 import { HttpException } from "@/exceptions/HttpException";
+import SelectionService from "@/services/selections.service";
+import UserStoryService from "@/services/user-story.service";
 import { isEmpty } from "@/utils/util";
 import { PrismaClient, Selection } from "@prisma/client";
 import { NextFunction, Request, Response } from "express";
@@ -7,6 +10,9 @@ import { NextFunction, Request, Response } from "express";
 class SelectionsController {
   public seletions = new PrismaClient().selection;
   public users = new PrismaClient().user;
+
+  public selectionService = new SelectionService();
+  public userStoryService = new UserStoryService();
 
   public getSelections = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
@@ -43,7 +49,7 @@ class SelectionsController {
 
   public getCurrentUserSelections = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const userId = 2;
+      const userId = 8;
       const findUser = await this.users.findUnique({
         where: { id: userId },
         include: {
@@ -52,9 +58,10 @@ class SelectionsController {
       });
 
       if (!findUser) throw new HttpException(400, "User does not exist");
+      const findSelections = findUser.selections;
 
       res.status(201).json({
-        data: findUser,
+        data: findSelections,
         message: "get current user's selections",
       });
     } catch (error) {
@@ -123,6 +130,44 @@ class SelectionsController {
       const deleteQuestionData = await this.seletions.delete({ where: { id: selectionId } });
 
       res.status(200).json({ data: deleteQuestionData, message: "deleted" });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public getUserStoriesInSelection = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const selectionId = Number(req.params.id);
+
+      const findSelection = await this.seletions.findUnique({
+        where: { id: selectionId },
+        include: {
+          userStories: true,
+        },
+      });
+
+      if (!findSelection) throw new HttpException(400, "Selection does not exist");
+
+      const findUserStories = findSelection.userStories;
+
+      res.status(200).json({ data: findUserStories, message: "get user stories in selection" });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public updateUserStoriesInSelection = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const selectionId = Number(req.params.id);
+      const findSelection = await this.selectionService.getSelectionById(selectionId);
+
+      const userStory = req.body as UpdateStoryDto;
+      if (isEmpty(userStory)) throw new HttpException(400, "User story body is empty");
+
+      const userStoryId = Number(req.params.userStoryId);
+      const updateUserStory = await this.userStoryService.updateUserStory(userStoryId, req.body);
+
+      res.status(200).json({ data: updateUserStory, message: "update user stories in selection" });
     } catch (error) {
       next(error);
     }

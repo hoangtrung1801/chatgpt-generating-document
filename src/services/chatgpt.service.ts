@@ -65,7 +65,7 @@ class ChatGPTService {
     return findBrief;
   }
 
-  public async generateTodoList(briefId: number): Promise<string[]> {
+  public async generateUserStoryList(briefId: number): Promise<string[]> {
     const findBrief = await this.chatgptBrief.findUnique({
       where: {
         id: briefId,
