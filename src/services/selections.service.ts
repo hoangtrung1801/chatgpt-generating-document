@@ -39,6 +39,7 @@ class SelectionService {
     });
 
     if (!createSelectionData) throw new HttpException(400, "Cannot create selection");
+    return createSelectionData;
   };
 }
 
