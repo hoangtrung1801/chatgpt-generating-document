@@ -9,7 +9,7 @@ import { PrismaClient, Selection } from "@prisma/client";
 import { NextFunction, Request, Response } from "express";
 
 class SelectionsController {
-  public seletions = new PrismaClient().selection;
+  public selections = new PrismaClient().selection;
   public users = new PrismaClient().user;
 
   public selectionService = new SelectionService();
@@ -17,7 +17,7 @@ class SelectionsController {
 
   public getSelections = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const findAllSelectionsData: Selection[] = await this.seletions.findMany();
+      const findAllSelectionsData: Selection[] = await this.selections.findMany();
 
       res.status(200).json({ data: findAllSelectionsData, message: "findAll" });
     } catch (error) {
@@ -30,7 +30,7 @@ class SelectionsController {
       const selectionId = Number(req.params.id);
       if (isEmpty(selectionId)) throw new HttpException(400, "SelectionId is empty");
 
-      const findSelectionData: Selection = await this.seletions.findUnique({
+      const findSelectionData: Selection = await this.selections.findUnique({
         where: { id: selectionId },
         include: {
           selectedOptions: {
@@ -62,24 +62,10 @@ class SelectionsController {
     }
   };
 
-  public createSelection = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public createSelection = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const selectionData: CreateSelectionDto = req.body;
-      const createSelectionData = await this.seletions.create({
-        data: {
-          ...selectionData,
-          selectedOptions: {
-            createMany: {
-              data: selectionData.selectedOptions.map(optionId => ({ optionId })),
-            },
-          },
-
-          // CHANGE THIS
-          userId: 2,
-        },
-      });
-
-      if (!createSelectionData) throw new HttpException(400, "Cannot create selection");
+      const user = req.user;
+      const createSelectionData = await this.selectionService.createSelection(req.body, user.id);
 
       res.status(201).json({
         data: createSelectionData,
@@ -93,12 +79,12 @@ class SelectionsController {
   public updateSelection = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const selectionId = Number(req.params.id);
-      const findSelectionData = await this.seletions.findUnique({ where: { id: selectionId } });
+      const findSelectionData = await this.selections.findUnique({ where: { id: selectionId } });
       if (!findSelectionData) throw new HttpException(400, "Selection does not exist");
 
       const selectionData: Partial<CreateSelectionDto> = req.body;
 
-      const updateSelectionData = await this.seletions.update({
+      const updateSelectionData = await this.selections.update({
         where: {
           id: selectionId,
         },
@@ -117,10 +103,10 @@ class SelectionsController {
     try {
       const selectionId = Number(req.params.id);
 
-      const findSelection = await this.seletions.findUnique({ where: { id: selectionId } });
+      const findSelection = await this.selections.findUnique({ where: { id: selectionId } });
       if (!findSelection) throw new HttpException(409, "Selection does not exist");
 
-      const deleteQuestionData = await this.seletions.delete({ where: { id: selectionId } });
+      const deleteQuestionData = await this.selections.delete({ where: { id: selectionId } });
 
       res.status(200).json({ data: deleteQuestionData, message: "deleted" });
     } catch (error) {
@@ -132,7 +118,7 @@ class SelectionsController {
     try {
       const selectionId = Number(req.params.id);
 
-      const findSelection = await this.seletions.findUnique({
+      const findSelection = await this.selections.findUnique({
         where: { id: selectionId },
         include: {
           userStories: true,

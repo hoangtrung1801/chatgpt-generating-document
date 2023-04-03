@@ -1,3 +1,4 @@
+import { CreateSelectionDto } from "@/dtos/selections.dto";
 import { HttpException } from "@/exceptions/HttpException";
 import { PrismaClient } from "@prisma/client";
 
@@ -19,8 +20,25 @@ class SelectionService {
         userId,
       },
     });
+    if (!findCurrentUserSelections) throw new HttpException(400, "Cannot find current user's selections");
 
     return findCurrentUserSelections;
+  };
+
+  public createSelection = async (selectionData: CreateSelectionDto, userId: number) => {
+    const createSelectionData = await this.selections.create({
+      data: {
+        ...selectionData,
+        selectedOptions: {
+          createMany: {
+            data: selectionData.selectedOptions.map(optionId => ({ optionId })),
+          },
+        },
+        userId,
+      },
+    });
+
+    if (!createSelectionData) throw new HttpException(400, "Cannot create selection");
   };
 }
 
