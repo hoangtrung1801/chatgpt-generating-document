@@ -1,9 +1,9 @@
 import { CreateSelectionDto } from "@/dtos/selections.dto";
-import { UpdateStoryDto } from "@/dtos/user-story.dto";
+import { CreateUserStoryDto } from "@/dtos/user-story.dto";
 import { HttpException } from "@/exceptions/HttpException";
 import { RequestWithUser } from "@/interfaces/auth.interface";
 import SelectionService from "@/services/selections.service";
-import UserStoryService from "@/services/user-story.service";
+import UserStoryService from "@/services/user-stories.service";
 import { isEmpty } from "@/utils/util";
 import { PrismaClient, Selection } from "@prisma/client";
 import { NextFunction, Request, Response } from "express";
@@ -117,6 +117,7 @@ class SelectionsController {
   public getUserStoriesInSelection = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const selectionId = Number(req.params.id);
+      if (!selectionId) throw new HttpException(400, "SelectionId is empty");
 
       const findSelection = await this.selections.findUnique({
         where: { id: selectionId },
@@ -140,7 +141,7 @@ class SelectionsController {
       const selectionId = Number(req.params.id);
       const findSelection = await this.selectionService.getSelectionById(selectionId);
 
-      const userStory = req.body as UpdateStoryDto;
+      const userStory = req.body as CreateUserStoryDto;
       if (isEmpty(userStory)) throw new HttpException(400, "User story body is empty");
 
       const userStoryId = Number(req.params.userStoryId);

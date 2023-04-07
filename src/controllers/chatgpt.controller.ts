@@ -2,7 +2,7 @@ import { GenerateBriefAnswerDto } from "@/dtos/chatgpt.dto";
 import { HttpException } from "@/exceptions/HttpException";
 import { RequestWithUser } from "@/interfaces/auth.interface";
 import ChatGPTService from "@/services/chatgpt.service";
-import UserStoryService from "@/services/user-story.service";
+import UserStoryService from "@/services/user-stories.service";
 import { chatGPTRequestBriefPrompt } from "@/utils/chatgpt-request";
 import { generateBriefPrompt } from "@/utils/generate-chatgpt-prompt";
 import { jiraPushUserStory } from "@/utils/jira-reqests";

@@ -9,6 +9,9 @@ import SelectionRoute from "./routes/selections.route";
 import SelectedOptionsRoute from "./routes/selected-options.route";
 import OptionsRoute from "./routes/options.route";
 import ChatGPTRoute from "./routes/chatgpt.route";
+import UserStoriesRoute from "./routes/user-stories.route";
+import SprintsRoute from "./routes/sprints.route";
+import EpicsRoute from "./routes/epics.route";
 
 validateEnv();
 
@@ -22,6 +25,9 @@ const app = new App([
   new SelectedOptionsRoute(),
   new OptionsRoute(),
   new ChatGPTRoute(),
+  new UserStoriesRoute(),
+  new SprintsRoute(),
+  new EpicsRoute(),
 ]);
 
 app.listen();

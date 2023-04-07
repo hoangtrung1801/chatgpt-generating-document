@@ -1,9 +1,13 @@
-import { UpdateStoryDto } from "@/dtos/user-story.dto";
+import { CreateUserStoryDto } from "@/dtos/user-story.dto";
 import { HttpException } from "@/exceptions/HttpException";
-import { PrismaClient, UserStory } from "@prisma/client";
+import { Prisma, PrismaClient, UserStory } from "@prisma/client";
 
 class UserStoryService {
   public userStories = new PrismaClient().userStory;
+
+  public getAllUserStories() {
+    return this.userStories.findMany();
+  }
 
   public async getUserStoryById(id: number) {
     const findUserStory = await this.userStories.findUnique({
@@ -16,21 +20,37 @@ class UserStoryService {
     return findUserStory;
   }
 
-  public async addUserStory(title: string, selectionId: number) {
+  public async getUserStoriesInSprint(sprintId: number) {
+    if (!sprintId) throw new HttpException(400, "Missing sprint id");
+    return this.userStories.findMany({
+      where: {
+        sprintId,
+      },
+    });
+  }
+
+  public async getUserStoriesInEpic(epicId: number) {
+    if (!epicId) throw new HttpException(400, "Missing epic id");
+
+    return this.userStories.findMany({
+      where: {
+        epicId,
+      },
+    });
+  }
+
+  public async addUserStory(userStoryData: CreateUserStoryDto) {
     const createUserStory = await this.userStories.create({
       data: {
-        title,
-        selection: {
-          connect: {
-            id: selectionId,
-          },
-        },
+        ...(userStoryData as UserStory),
       },
     });
     return createUserStory;
   }
 
-  public async updateUserStory(id: number, userStory: UpdateStoryDto) {
+  public async updateUserStory(id: number, userStory: CreateUserStoryDto) {
+    if (!id) throw new HttpException(400, "Missing user story id");
+
     const findUserStory = await this.userStories.findUnique({
       where: {
         id,

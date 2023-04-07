@@ -1,16 +1,33 @@
 import UserStoryStatusEnum from "@/utils/enums/user-story-status";
-import { IsEnum, IsOptional, IsString } from "class-validator";
+import { IsEnum, IsNumber, IsOptional, IsString } from "class-validator";
 
-export class UpdateStoryDto {
+export class CreateUserStoryDto {
   @IsString()
-  @IsOptional()
-  title?: string;
+  title: string;
 
   @IsString()
-  @IsOptional()
-  description?: string;
+  description: string;
 
   @IsEnum(UserStoryStatusEnum)
   @IsOptional()
   status?: string;
+
+  @IsNumber()
+  @IsOptional()
+  storyPoint?: number;
+
+  @IsNumber()
+  @IsOptional()
+  assigneeId?: number;
+
+  @IsNumber()
+  @IsOptional()
+  sprintId?: number;
+
+  @IsNumber()
+  @IsOptional()
+  epicId?: number;
+
+  @IsNumber()
+  selectionId: number;
 }

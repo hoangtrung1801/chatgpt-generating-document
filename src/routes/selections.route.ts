@@ -1,5 +1,6 @@
 import SelectionsController from "@/controllers/selections.controller";
 import { CreateSelectionDto } from "@/dtos/selections.dto";
+import { CreateUserStoryDto } from "@/dtos/user-story.dto";
 import authMiddleware from "@/middlewares/auth.middleware";
 import validationMiddleware from "@/middlewares/validation.middleware";
 import { Routes } from "@interfaces/routes.interface";
@@ -8,7 +9,7 @@ import { Router } from "express";
 class SelectionRoute implements Routes {
   public path = "/selections";
   public router = Router();
-  public seletionsController = new SelectionsController();
+  public selectionsController = new SelectionsController();
 
   constructor() {
     this.initializeRoutes();
@@ -17,17 +18,23 @@ class SelectionRoute implements Routes {
   private initializeRoutes() {
     this.router.use(`${this.path}`, authMiddleware);
 
-    this.router.get(`${this.path}`, this.seletionsController.getSelections);
-    this.router.get(`${this.path}/:id(\\d+)`, this.seletionsController.getSelectionById);
-    this.router.get(`${this.path}/:id/user-stories`, this.seletionsController.getUserStoriesInSelection);
-    this.router.get(`${this.path}/current-user`, this.seletionsController.getCurrentUserSelections);
+    this.router.get(`${this.path}`, this.selectionsController.getSelections);
 
-    this.router.post(`${this.path}`, authMiddleware, validationMiddleware(CreateSelectionDto, "body"), this.seletionsController.createSelection);
+    this.router.get(`${this.path}/:id(\\d+)`, this.selectionsController.getSelectionById);
+    this.router.get(`${this.path}/:id(\\d+)/user-stories`, this.selectionsController.getUserStoriesInSelection);
 
-    this.router.put(`${this.path}/:id(\\d+)`, validationMiddleware(CreateSelectionDto, "body", true), this.seletionsController.updateSelection);
-    this.router.put(`${this.path}/:id(\\d+)/user-stories/:userStoryId(\\d+)`, this.seletionsController.updateUserStoriesInSelection);
+    this.router.get(`${this.path}/current-user`, this.selectionsController.getCurrentUserSelections);
 
-    this.router.delete(`${this.path}/:id(\\d+)`, this.seletionsController.deleteSelection);
+    this.router.post(`${this.path}`, authMiddleware, validationMiddleware(CreateSelectionDto, "body"), this.selectionsController.createSelection);
+
+    this.router.put(`${this.path}/:id(\\d+)`, validationMiddleware(CreateSelectionDto, "body", true), this.selectionsController.updateSelection);
+    this.router.put(
+      `${this.path}/:id(\\d+)/user-stories/:userStoryId(\\d+)`,
+      validationMiddleware(CreateUserStoryDto, "body", true),
+      this.selectionsController.updateUserStoriesInSelection,
+    );
+
+    this.router.delete(`${this.path}/:id(\\d+)`, this.selectionsController.deleteSelection);
 
     // this.router.post(`${this.path}`, validationMiddleware(CreateUserDto, "body"), this.usersController.createCategory);
     // this.router.post(`${this.path}`, validationMiddleware(CreateQuestionDto, "body"), this.questionController.createQuestion);
