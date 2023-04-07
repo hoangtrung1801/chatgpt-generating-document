@@ -156,7 +156,7 @@ class ChatGPTController {
 
       const responses = await Promise.all([
         ...userStories.map(todo => this.userStoryService.addUserStory(todo, brief.selectionId)),
-        ...userStories.map(todo => jiraPushUserStory(todo)),
+        // ...userStories.map(todo => jiraPushUserStory(todo)),
       ]);
 
       const userStoriesData = responses.slice(0, responses.length / 2);
