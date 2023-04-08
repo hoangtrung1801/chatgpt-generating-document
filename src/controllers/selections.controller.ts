@@ -38,6 +38,8 @@ class SelectionsController {
               option: true,
             },
           },
+          sprint: true,
+          epic: true,
         },
       });
       if (!findSelectionData) throw new HttpException(400, "SelectionId does not exist");
@@ -57,6 +59,18 @@ class SelectionsController {
         data: findCurrentUserSelections,
         message: "get current user's selections",
       });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public getBriefOfSelection = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const selectionId = Number(req.params.id);
+      if (isEmpty(selectionId)) throw new HttpException(400, "SelectionId is empty");
+
+      const findBrief = await this.selectionService.getBriefOfSelection(selectionId);
+      res.status(200).json({ data: findBrief, message: "find brief of selection" });
     } catch (error) {
       next(error);
     }

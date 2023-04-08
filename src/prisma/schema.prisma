@@ -100,8 +100,9 @@ model Selection {
   userStories UserStory[]
 
   chatGPTBriefAnswer ChatGPTBriefAnswer?
-  Sprint             Sprint[]
-  Epic               Epic[]
+
+  sprint             Sprint[]
+  epic               Epic[]
 
   @@map("ai_selection")
 }

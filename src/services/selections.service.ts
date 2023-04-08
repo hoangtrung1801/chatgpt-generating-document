@@ -14,6 +14,18 @@ class SelectionService {
     return findSelection;
   };
 
+  public getBriefOfSelection = async (selectionId: number) => {
+    const findSelection = await this.selections.findUnique({
+      where: { id: selectionId },
+      include: {
+        chatGPTBriefAnswer: true,
+      },
+    });
+
+    if (!findSelection) throw new HttpException(400, "Selection does not exist");
+    return findSelection.chatGPTBriefAnswer;
+  };
+
   public findCurrentUserSelections = async (userId: number) => {
     const findCurrentUserSelections = await this.selections.findMany({
       where: {

@@ -22,6 +22,7 @@ class SelectionRoute implements Routes {
 
     this.router.get(`${this.path}/:id(\\d+)`, this.selectionsController.getSelectionById);
     this.router.get(`${this.path}/:id(\\d+)/user-stories`, this.selectionsController.getUserStoriesInSelection);
+    this.router.get(`${this.path}/:id(\\d+)/brief`, this.selectionsController.getBriefOfSelection);
 
     this.router.get(`${this.path}/current-user`, this.selectionsController.getCurrentUserSelections);
 

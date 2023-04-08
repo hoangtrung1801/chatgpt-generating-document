@@ -28,6 +28,9 @@ class EpicsService {
       where: {
         id,
       },
+      include: {
+        userStories: true,
+      },
     });
     if (!findEpic) throw new HttpException(400, "Epic does not exist");
     return findEpic;
