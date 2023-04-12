@@ -467,7 +467,7 @@ paths:
         500:
           description: 'Server Error'
 
-  /selections/:selectionId/brief:
+  /selections/:id/brief:
     get:
       tags:
         - Selection
@@ -483,6 +483,38 @@ paths:
            $ref: '#/components/responses/Brief'
         500:
           description: 'Server Error'
+
+  /selections/:id/user-flow:
+    put:
+      tags:
+        - Selection
+      summary: Update user flow of selection
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nodes:
+                  type: array
+                  items:
+                    type: object
+                edges:
+                  type: array
+                  items:
+                    type: object
+      responses:
+        200:
+          $ref: '#/components/responses/Selection'
+
+
 
 # ========= Option ===================
   /options:
@@ -1303,6 +1335,17 @@ components:
           items:
             $ref: '#/components/schemas/Epic'
           description: All spics in selection
+        userFlow:
+          type: object
+          properties:
+            nodes:
+              type: array
+              items:
+                type: object
+            edges:
+              type: array
+              items:
+                type: object
 
     CreateBrief:
       type: object

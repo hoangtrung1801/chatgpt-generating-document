@@ -11,10 +11,10 @@ generator client {
 }
 
 model User {
-  id         Int      @id @default(autoincrement())
-  name       String
-  email      String   @unique
-  password   String
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
   createdAt DateTime @default(now()) @map("created_at")
 
   selections Selection[]
@@ -84,9 +84,9 @@ model SelectedOption {
 }
 
 model Selection {
-  id          Int    @id @default(autoincrement())
+  id          Int      @id @default(autoincrement())
   title       String
-  description String @db.Text
+  description String   @db.Text
   createdAt   DateTime @default(now()) @map("created_at")
 
   selectedOptions SelectedOption[]
@@ -101,8 +101,11 @@ model Selection {
 
   chatGPTBriefAnswer ChatGPTBriefAnswer?
 
-  sprint             Sprint[]
-  epic               Epic[]
+  sprint Sprint[]
+
+  epic Epic[]
+
+  userFlow Json? @map("user_flow") @default("{}")
 
   @@map("ai_selection")
 }

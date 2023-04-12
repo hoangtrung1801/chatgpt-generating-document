@@ -1,6 +1,6 @@
-import { CreateSelectionDto } from "@/dtos/selections.dto";
+import { CreateSelectionDto, UserFlowDto } from "@/dtos/selections.dto";
 import { HttpException } from "@/exceptions/HttpException";
-import { PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 
 class SelectionService {
   public selections = new PrismaClient().selection;
@@ -52,6 +52,19 @@ class SelectionService {
 
     if (!createSelectionData) throw new HttpException(400, "Cannot create selection");
     return createSelectionData;
+  };
+
+  public updateUserFlow = async (selectionId: number, userFlowData: UserFlowDto) => {
+    if (!this.getSelectionById(selectionId)) return;
+    const updateUserFlowData = await this.selections.update({
+      where: { id: selectionId },
+      data: {
+        userFlow: userFlowData as unknown as Prisma.JsonObject,
+      },
+    });
+
+    if (!updateUserFlowData) throw new HttpException(400, "Cannot update user flow");
+    return updateUserFlowData;
   };
 }
 

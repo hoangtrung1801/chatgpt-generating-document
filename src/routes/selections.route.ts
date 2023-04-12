@@ -1,5 +1,5 @@
 import SelectionsController from "@/controllers/selections.controller";
-import { CreateSelectionDto } from "@/dtos/selections.dto";
+import { CreateSelectionDto, UserFlowDto } from "@/dtos/selections.dto";
 import { CreateUserStoryDto } from "@/dtos/user-story.dto";
 import authMiddleware from "@/middlewares/auth.middleware";
 import validationMiddleware from "@/middlewares/validation.middleware";
@@ -34,6 +34,7 @@ class SelectionRoute implements Routes {
       validationMiddleware(CreateUserStoryDto, "body", true),
       this.selectionsController.updateUserStoriesInSelection,
     );
+    this.router.put(`${this.path}/:id(\\d+)/user-flow`, validationMiddleware(UserFlowDto, "body"), this.selectionsController.updateUserFlow);
 
     this.router.delete(`${this.path}/:id(\\d+)`, this.selectionsController.deleteSelection);
 

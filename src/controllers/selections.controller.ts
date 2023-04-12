@@ -1,4 +1,4 @@
-import { CreateSelectionDto } from "@/dtos/selections.dto";
+import { CreateSelectionDto, UserFlowDto } from "@/dtos/selections.dto";
 import { CreateUserStoryDto } from "@/dtos/user-story.dto";
 import { HttpException } from "@/exceptions/HttpException";
 import { RequestWithUser } from "@/interfaces/auth.interface";
@@ -162,6 +162,19 @@ class SelectionsController {
       const updateUserStory = await this.userStoryService.updateUserStory(userStoryId, req.body);
 
       res.status(200).json({ data: updateUserStory, message: "update user stories in selection" });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public updateUserFlow = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const selectionId = Number(req.params.id);
+
+      const userFlow = req.body as UserFlowDto;
+      const selection = await this.selectionService.updateUserFlow(selectionId, userFlow);
+
+      res.status(200).json({ data: selection, message: "Updated user flow" });
     } catch (error) {
       next(error);
     }
