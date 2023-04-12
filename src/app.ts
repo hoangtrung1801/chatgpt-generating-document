@@ -1,3 +1,7 @@
+import { CREDENTIALS, LOG_FORMAT, NODE_ENV, ORIGIN, PORT } from "@config";
+import { Routes } from "@interfaces/routes.interface";
+import errorMiddleware from "@middlewares/error.middleware";
+import { logger, stream } from "@utils/logger";
 import compression from "compression";
 import cookieParser from "cookie-parser";
 import cors from "cors";
@@ -7,10 +11,6 @@ import hpp from "hpp";
 import morgan from "morgan";
 import swaggerJSDoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
-import { NODE_ENV, PORT, LOG_FORMAT, ORIGIN, CREDENTIALS } from "@config";
-import { Routes } from "@interfaces/routes.interface";
-import errorMiddleware from "@middlewares/error.middleware";
-import { logger, stream } from "@utils/logger";
 
 class App {
   public app: express.Application;
@@ -59,19 +59,27 @@ class App {
   }
 
   private initializeSwagger() {
-    const options = {
-      swaggerDefinition: {
+    const options: swaggerJSDoc.Options = {
+      // swaggerDefinition: {
+      // //   info: {
+      //     title: "REST API",
+      //     version: "1.0.0",
+      //     description: "Example docs",
+      //   },
+      // },
+      // apis: ["./src/routes/*.ts", "swagger.yaml"],
+      definition: {
         info: {
           title: "REST API",
           version: "1.0.0",
-          description: "Example docs",
         },
+        openapi: "3.0.2",
       },
       apis: ["swagger.yaml"],
     };
 
     const specs = swaggerJSDoc(options);
-    this.app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
+    this.app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs, { explorer: true }));
   }
 
   private initializeErrorHandling() {
