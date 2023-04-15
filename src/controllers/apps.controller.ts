@@ -1,3 +1,4 @@
+import { CreateAppDto } from "@/dtos/apps.dto";
 import { HttpException } from "@/exceptions/HttpException";
 import { isEmpty } from "@/utils/util";
 import { App, PrismaClient } from "@prisma/client";
@@ -36,7 +37,7 @@ class AppsController {
 
   public createApp = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const appData = req.body;
+      const appData = req.body as CreateAppDto;
       const createAppData: App = await this.apps.create({
         data: appData,
       });

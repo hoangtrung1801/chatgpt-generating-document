@@ -25,27 +25,27 @@ model User {
 }
 
 model App {
-  id           Int     @id @default(autoincrement())
-  name         String
-  thumbnail    String? @db.VarChar(512)
+  id        Int     @id @default(autoincrement())
+  name      String
+  thumbnail String? @db.VarChar(512)
   // primaryColor String? @map("primary_color")
-  status       Boolean @default(false) @db.Bit(1)
+  status    Boolean @default(false) @db.Bit(1)
+
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  categoryId Int      @map("category_id")
 
   questions Question[]
 
   selections Selection[]
 
-  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  categoryId Int @map("category_id")
-
   @@map("ai_app")
 }
 
 model Category {
-  id Int @id @default(autoincrement())
-  name String
+  id        Int     @id @default(autoincrement())
+  name      String
   thumbnail String? @db.VarChar(512)
-  status Boolean @default(false) @db.Bit(1)
+  status    Boolean @default(false) @db.Bit(1)
 
   apps App[]
 
