@@ -19,8 +19,11 @@ class QuestionsRoute implements Routes {
 
     this.router.get(`${this.path}`, this.questionController.getQuestions);
     this.router.get(`${this.path}/:id(\\d+)`, this.questionController.getQuestionById);
+    this.router.get(`${this.path}/apps/:appId(\\d+)`, this.questionController.getQuestionsByAppId);
+
     // this.router.post(`${this.path}`, validationMiddleware(CreateUserDto, "body"), this.usersController.createCategory);
     this.router.post(`${this.path}`, validationMiddleware(CreateQuestionDto, "body"), this.questionController.createQuestion);
+
     // this.router.put(`${this.path}/:id(\\d+)`, validationMiddleware(CreateUserDto, "body", true), this.usersController.updateCategory);
     this.router.put(`${this.path}/:id(\\d+)`, this.questionController.updateQuestion);
     this.router.delete(`${this.path}/:id(\\d+)`, this.questionController.deleteQuestion);

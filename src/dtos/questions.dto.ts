@@ -1,27 +1,33 @@
-import { Option } from "@prisma/client";
-import { IsBoolean, IsInt, IsObject, IsOptional, IsString } from "class-validator";
+import { QuestionType } from "@prisma/client";
+import { IsBoolean, IsEnum, IsInt, IsObject, IsOptional, IsString } from "class-validator";
+import { CreateOptionDto } from "./option.dto";
 
 export class CreateQuestionDto {
   @IsString()
   name: string;
 
   @IsString()
+  @IsOptional()
   description: string;
 
   @IsString()
-  questionGPT: string;
-
-  @IsBoolean()
   @IsOptional()
-  status: Boolean;
+  questionGPT: string;
 
   @IsString()
   @IsOptional()
-  type: string;
+  keyword: string;
+
+  @IsBoolean()
+  @IsOptional()
+  status: boolean;
+
+  @IsEnum(QuestionType)
+  type: QuestionType;
 
   @IsInt()
   appId: number;
 
   @IsObject({ each: true })
-  options: Omit<Option, "id">[];
+  options: CreateOptionDto;
 }

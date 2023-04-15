@@ -1,5 +1,6 @@
 import { CreateQuestionDto } from "@/dtos/questions.dto";
 import { HttpException } from "@/exceptions/HttpException";
+import QuestionsService from "@/services/questions.service";
 import { isEmpty } from "@/utils/util";
 import { PrismaClient, Question } from "@prisma/client";
 import { NextFunction, Request, Response } from "express";
@@ -7,6 +8,8 @@ import { NextFunction, Request, Response } from "express";
 class QuestionsController {
   public questions = new PrismaClient().question;
   public options = new PrismaClient().option;
+
+  public questionsService = new QuestionsService();
 
   public getQuestions = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
@@ -37,6 +40,19 @@ class QuestionsController {
     }
   };
 
+  public getQuestionsByAppId = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const appId = Number(req.params.appId);
+      if (isEmpty(appId)) throw new HttpException(400, "AppId is empty");
+
+      const findQuestionsOfAppData: any = await this.questionsService.getQuestionByAppId(appId);
+
+      res.status(200).json({ data: findQuestionsOfAppData, message: "found questions of app" });
+    } catch (error) {
+      next(error);
+    }
+  };
+
   public createQuestion = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       // const userData: CreateUserDto = req.body;
@@ -50,8 +66,10 @@ class QuestionsController {
       const createQuestionData: Question = await this.questions.create({
         data: {
           name: questionData.name,
-          description: questionData.description,
-          questionGPT: questionData.questionGPT,
+          description: questionData?.description,
+          questionGPT: questionData?.questionGPT,
+          keyword: questionData?.keyword || "",
+          status: questionData?.status,
           appId: questionData.appId,
           type: questionData.type,
           options: {

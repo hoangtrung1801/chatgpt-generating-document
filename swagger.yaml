@@ -387,6 +387,27 @@ paths:
         500:
           description: 'Server Error'
 
+  /questions/apps/{appId}:
+    get:
+      tags:
+        - Question
+      summary: Get question of app
+      responses:
+        200:
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Question'
+    parameters:
+      - name: appId
+        in: path
+        required: true
+        schema:
+          type: integer
+
 # ========= Selection ===================
   /selections:
     get:

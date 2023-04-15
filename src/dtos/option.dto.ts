@@ -1,11 +1,11 @@
-import { Prisma } from "@prisma/client";
-import { IsString } from "class-validator";
+import { IsOptional, IsString } from "class-validator";
 
-export class CreateOptionDto implements Prisma.OptionUpdateInput {
+export class CreateOptionDto {
   @IsString()
   name: string;
 
   @IsString()
+  @IsOptional()
   description: string;
 
   @IsString()
