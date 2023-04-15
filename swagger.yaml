@@ -9,6 +9,7 @@ tags:
   description: BE use cookie to store authorization token, so you should request /login or /signup before you can request others endpoint
 - name: User
   # description: users API
+- name: Category
 - name: App
 - name: Question
 - name: Selection
@@ -137,6 +138,88 @@ paths:
           description: 'Conflict'
         500:
           description: 'Server Error'
+
+# ========= Category =========================
+  /categories:
+    get:
+      tags:
+        - Category
+      summary: 'Get all categories'
+      responses:
+        200:
+          description: Return all categories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Category'
+        500:
+          description: 'Server Error'
+    post:
+      tags:
+        - Category
+      summary: 'Create category'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCategory'
+      responses:
+        201:
+          description: Created category
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+        500:
+          description: 'Server Error'
+
+  /categories/{id}:
+    get:
+      tags:
+      - Category
+      summary: Get category by id
+      responses:
+        200:
+          description: Return category
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+        500:
+          description: 'Server Error'
+    put:
+      tags:
+        - Category
+      summary: Update category
+      responses:
+        200:
+          description: Updated category
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+        500:
+          description: 'Server Error'
+    delete:
+      tags:
+        - Category
+      summary: Update category
+      responses:
+        200:
+          description: Deleted category
+        500:
+          description: 'Server Error'
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+
+
 
 # ========= App =========================
   /apps:
@@ -1191,6 +1274,36 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Selection'
+
+    Category:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        thumbnail:
+          type: string
+        status:
+          type: boolean
+        apps:
+          description: All apps in this category
+          type: array
+          items:
+            $ref: '#/components/schemas/App'
+    CreateCategory:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+        thumbnail:
+          type: string
+        status:
+          type: boolean
+
+
 
     App:
       type: object
