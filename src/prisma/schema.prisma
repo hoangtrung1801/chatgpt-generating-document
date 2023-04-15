@@ -24,31 +24,31 @@ model User {
   @@map("user")
 }
 
-model Category {
+model App {
   id           Int     @id @default(autoincrement())
-  name         String  @map("category_name")
-  thumbnail    String  @map("category_thumbnail")
-  primaryColor String  @map("primary_color")
-  status       Boolean @db.Bit(1)
+  name         String  @map("name")
+  thumbnail    String? @map("thumbnail") @db.VarChar(512)
+  primaryColor String? @map("primary_color")
+  status       Boolean @default(false) @db.Bit(1)
 
   questions Question[]
 
   selections Selection[]
 
-  @@map("ai_category")
+  @@map("ai_app")
 }
 
 model Question {
-  id          Int     @id @default(autoincrement())
-  name        String  @map("question_name")
-  description String  @map("question_description") @db.Text
-  questionGPT String  @map("question_gpt") @db.Text
-  keyword     String  @default("") @map("question_keyword")
-  status      Boolean @default(true) @db.Bit(1)
-  type        String  @default("")
+  id          Int          @id @default(autoincrement())
+  name        String       @map("question_name")
+  description String       @map("question_description") @db.Text
+  questionGPT String       @map("question_gpt") @db.Text
+  keyword     String       @default("") @map("question_keyword")
+  status      Boolean      @default(true) @db.Bit(1)
+  type        QuestionType
 
-  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  categoryId Int      @map("category_id")
+  app   App @relation(fields: [appId], references: [id], onDelete: Cascade)
+  appId Int @map("app_id")
 
   options Option[]
 
@@ -91,8 +91,8 @@ model Selection {
 
   selectedOptions SelectedOption[]
 
-  category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  categoryId Int?      @default(3) @map("category_id")
+  app   App? @relation(fields: [appId], references: [id], onDelete: SetNull)
+  appId Int? @default(3) @map("app_id")
 
   user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId Int  @default(1) @map("user_id")
@@ -105,7 +105,7 @@ model Selection {
 
   epic Epic[]
 
-  userFlow Json? @map("user_flow") @default("{}")
+  userFlow Json? @default("{}") @map("user_flow")
 
   @@map("ai_selection")
 }
@@ -202,4 +202,12 @@ enum EpicStatus {
   ARCHIVED
 
   @@map("epic_status")
+}
+
+enum QuestionType {
+  SINGLE
+  MULTI
+  YESNO
+
+  @@map("question_type")
 }

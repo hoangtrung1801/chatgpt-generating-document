@@ -93,7 +93,7 @@ class ChatGPTController {
               },
             },
           },
-          category: true,
+          app: true,
         },
       });
       if (!findSelectionData) throw new HttpException(400, "SelectionId does not exist");
@@ -112,9 +112,9 @@ class ChatGPTController {
         }
       });
 
-      // get category name
-      const categoryData = findSelectionData.category;
-      const categoryName = categoryData.name;
+      // get app name
+      const appData = findSelectionData.app;
+      const appName = appData.name;
 
       const briefPrompt = generateBriefPrompt({
         softwareName: findSelectionData.title,
@@ -154,8 +154,9 @@ class ChatGPTController {
 
       const userStories = await this.chatgptService.generateUserStoryList(briefId);
 
+      // UPDATE
       const responses = await Promise.all([
-        ...userStories.map(todo => this.userStoryService.addUserStory(todo, brief.selectionId)),
+        // ...userStories.map(todo => this.userStoryService.addUserStory(todo, brief.selectionId)),
         // ...userStories.map(todo => jiraPushUserStory(todo)),
       ]);
 

@@ -3,7 +3,7 @@ import AuthRoute from "@routes/auth.route";
 import IndexRoute from "@routes/index.route";
 import UsersRoute from "@routes/users.route";
 import validateEnv from "@utils/validateEnv";
-import CategoriesRoute from "./routes/categories.route";
+import AppsRoute from "./routes/apps.route";
 import QuestionsRoute from "./routes/questions.route";
 import SelectionRoute from "./routes/selections.route";
 import SelectedOptionsRoute from "./routes/selected-options.route";
@@ -19,7 +19,7 @@ const app = new App([
   new IndexRoute(),
   new UsersRoute(),
   new AuthRoute(),
-  new CategoriesRoute(),
+  new AppsRoute(),
   new QuestionsRoute(),
   new SelectionRoute(),
   new SelectedOptionsRoute(),

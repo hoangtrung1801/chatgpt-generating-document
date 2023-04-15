@@ -1,4 +1,4 @@
-import { ArrayMinSize, IsArray, IsInt, IsJSON, IsObject, IsString } from "class-validator";
+import { ArrayMinSize, IsArray, IsInt, IsObject, IsString } from "class-validator";
 
 export class CreateSelectionDto {
   @IsInt({ each: true })
@@ -7,7 +7,7 @@ export class CreateSelectionDto {
   selectedOptions: number[];
 
   @IsInt()
-  categoryId: number;
+  appId: number;
 
   @IsString()
   title: string;

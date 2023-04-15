@@ -9,7 +9,7 @@ tags:
   description: BE use cookie to store authorization token, so you should request /login or /signup before you can request others endpoint
 - name: User
   # description: users API
-- name: Category
+- name: App
 - name: Question
 - name: Selection
 - name: Option
@@ -138,97 +138,86 @@ paths:
         500:
           description: 'Server Error'
 
-# ========= Category =========================
-  /categories:
+# ========= App =========================
+  /apps:
     get:
       tags:
-        - Category
-      summary: 'Get all categories'
+        - App
+      summary: 'Get all apps'
       responses:
         200:
-          description: Return all categories
+          description: Return all apps
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Category'
+                  $ref: '#/components/schemas/App'
         500:
           description: 'Server Error'
     post:
       tags:
-        - Category
-      summary: 'Create category'
+        - App
+      summary: 'Create app'
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateCategory'
+              $ref: '#/components/schemas/CreateApp'
       responses:
         201:
-          description: Created category
+          description: Created app
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Category'
+                $ref: '#/components/schemas/App'
         500:
           description: 'Server Error'
 
-  /categories/{id}:
+  /apps/{id}:
     get:
       tags:
-      - Category
-      summary: Get category by id
-      parameters:
-        - name: id
-          in: query
-          required: true
-          schema:
-            type: integer
+      - App
+      summary: Get app by id
       responses:
         200:
-          description: Return category
+          description: Return app
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Category'
+                $ref: '#/components/schemas/App'
         500:
           description: 'Server Error'
     put:
       tags:
-        - Category
-      summary: Update category
-      parameters:
-        - name: id
-          in: query
-          required: true
-          schema:
-            type: integer
+        - App
+      summary: Update app
       responses:
         200:
-          description: Updated category
+          description: Updated app
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Category'
+                $ref: '#/components/schemas/App'
         500:
           description: 'Server Error'
     delete:
       tags:
-        - Category
-      summary: Update category
-      parameters:
-        - name: id
-          in: query
-          required: true
-          schema:
-            type: integer
+        - App
+      summary: Update app
       responses:
         200:
-          description: Deleted category
+          description: Deleted app
         500:
           description: 'Server Error'
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+
 
 # ========= Question ===================
   /questions:
@@ -302,7 +291,7 @@ paths:
     delete:
       tags:
         - Question
-      summary: Update category
+      summary: Update app
       parameters:
         - name: id
           in: query
@@ -387,7 +376,7 @@ paths:
     delete:
       tags:
         - Selection
-      summary: Update category
+      summary: Update app
       parameters:
         - name: id
           in: query
@@ -697,7 +686,7 @@ paths:
     # delete:
     #   tags:
     #     - Selection
-    #   summary: Update category
+    #   summary: Update app
     #   parameters:
     #     - name: id
     #       in: query
@@ -1203,7 +1192,7 @@ components:
           items:
             $ref: '#/components/schemas/Selection'
 
-    Category:
+    App:
       type: object
       properties:
         id:
@@ -1217,11 +1206,11 @@ components:
         status:
           type: boolean
         questions:
-          description: All question in this category
+          description: All question in this app
           type: array
           items:
             $ref: '#/components/schemas/Question'
-    CreateCategory:
+    CreateApp:
       type: object
       required:
         - name
@@ -1241,7 +1230,7 @@ components:
         - name
         - description
         - questionGPT
-        - categoryId
+        - appId
         - options
         - type
       properties:
@@ -1257,7 +1246,7 @@ components:
           type: boolean
         type:
           type: string
-        categoryId:
+        appId:
           type: integer
         options:
           type: array
@@ -1299,12 +1288,12 @@ components:
     CreateSelection:
       type: object
       required:
-      - categoryId
+      - appId
       - selectedOptions
       - title
       - description
       properties:
-        categoryId:
+        appId:
           type: integer
         selectedOptions:
           type: array

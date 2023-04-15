@@ -20,7 +20,7 @@ export class CreateQuestionDto {
   type: string;
 
   @IsInt()
-  categoryId: number;
+  appId: number;
 
   @IsObject({ each: true })
   options: Omit<Option, "id">[];
