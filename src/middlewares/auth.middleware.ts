@@ -6,6 +6,9 @@ import { HttpException } from "@exceptions/HttpException";
 import { DataStoredInToken, RequestWithUser } from "@interfaces/auth.interface";
 
 const authMiddleware = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+  const users = new PrismaClient().user;
+  const findUser = await users.findUnique({ where: { id: 7 } });
+  req.user = findUser;
   next();
 
   // try {
