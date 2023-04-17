@@ -14,8 +14,9 @@ class QuestionsController {
   public getQuestions = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const findAllQuestionsData: Question[] = await this.questions.findMany();
+      const count = await this.questionsService.getQuestions();
 
-      res.status(200).json({ data: findAllQuestionsData, message: "findAll" });
+      res.status(200).json({ data: findAllQuestionsData, count, message: "findAll" });
     } catch (error) {
       next(error);
     }

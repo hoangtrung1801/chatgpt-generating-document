@@ -5,6 +5,10 @@ import { Prisma, PrismaClient, UserStory } from "@prisma/client";
 class UserStoryService {
   public userStories = new PrismaClient().userStory;
 
+  public countUserStories() {
+    return this.userStories.count();
+  }
+
   public getAllUserStories() {
     return this.userStories.findMany();
   }

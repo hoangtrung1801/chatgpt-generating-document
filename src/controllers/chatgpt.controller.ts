@@ -35,10 +35,10 @@ class ChatGPTController {
     try {
       const user = req.user;
       const findAllBriefAnswers: ChatGPTBriefAnswer[] = await this.chatgptService.getBriefsOfUser(user.id);
-      console.log(user, findAllBriefAnswers);
 
       res.status(200).json({
         data: findAllBriefAnswers,
+        count: await this.chatgptBrief.count(),
         message: "found all",
       });
     } catch (error) {
@@ -117,7 +117,7 @@ class ChatGPTController {
       const appName = appData.name;
 
       const briefPrompt = generateBriefPrompt({
-        softwareName: findSelectionData.title,
+        softwareName: findSelectionData.projectName,
         description: findSelectionData.description,
         features: Object.keys(selectedQuestions),
       });

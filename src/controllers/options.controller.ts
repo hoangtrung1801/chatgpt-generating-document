@@ -8,8 +8,9 @@ class OptionsController {
   public getOptions = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const findAllOptionsData: Option[] = await this.options.findMany();
+      const count = await this.options.count();
 
-      res.status(200).json({ data: findAllOptionsData, message: "found all options" });
+      res.status(200).json({ data: findAllOptionsData, count, message: "found all options" });
     } catch (error) {
       next(error);
     }

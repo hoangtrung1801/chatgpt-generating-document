@@ -17,6 +17,10 @@ class QuestionsService {
 
     return findQuestionsOfAppData;
   };
+
+  public async getQuestions() {
+    return await this.questions.count();
+  }
 }
 
 export default QuestionsService;

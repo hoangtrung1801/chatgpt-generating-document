@@ -5,6 +5,10 @@ import { Prisma, PrismaClient } from "@prisma/client";
 class SelectionService {
   public selections = new PrismaClient().selection;
 
+  public async countSelections() {
+    return await this.selections.count();
+  }
+
   public getSelectionById = async (selectionId: number) => {
     const findSelection = await this.selections.findUnique({
       where: { id: selectionId },

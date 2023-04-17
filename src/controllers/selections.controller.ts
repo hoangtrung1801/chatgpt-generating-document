@@ -18,8 +18,9 @@ class SelectionsController {
   public getSelections = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const findAllSelectionsData: Selection[] = await this.selections.findMany();
+      const count = await this.selectionService.countSelections();
 
-      res.status(200).json({ data: findAllSelectionsData, message: "findAll" });
+      res.status(200).json({ data: findAllSelectionsData, count, message: "findAll" });
     } catch (error) {
       next(error);
     }

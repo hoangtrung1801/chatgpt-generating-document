@@ -1,16 +1,19 @@
 import { HttpException } from "@/exceptions/HttpException";
+import CategoriesService from "@/services/categories.service";
 import { isEmpty } from "@/utils/util";
 import { Category, PrismaClient } from "@prisma/client";
 import { NextFunction, Request, Response } from "express";
 
 class CategoriesController {
   public categories = new PrismaClient().category;
+  public categoriesService = new CategoriesService();
 
   public getCategories = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const findAllsData: Category[] = await this.categories.findMany();
+      const count = await this.categoriesService.countCategories();
 
-      res.status(200).json({ data: findAllsData, message: "Found all categories" });
+      res.status(200).json({ data: findAllsData, count, message: "Found all categories" });
     } catch (error) {
       next(error);
     }

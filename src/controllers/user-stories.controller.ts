@@ -8,8 +8,9 @@ class UserStoriesController {
   public getAllUserStories = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const allUserStories = await this.userStoriesService.getAllUserStories();
+      const count = await this.userStoriesService.countUserStories();
 
-      res.status(200).json({ data: allUserStories, message: "All user stories" });
+      res.status(200).json({ data: allUserStories, count, message: "All user stories" });
     } catch (error) {
       next(error);
     }

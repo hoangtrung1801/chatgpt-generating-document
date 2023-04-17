@@ -1,17 +1,20 @@
 import { CreateAppDto } from "@/dtos/apps.dto";
 import { HttpException } from "@/exceptions/HttpException";
+import AppsService from "@/services/apps.service";
 import { isEmpty } from "@/utils/util";
 import { App, PrismaClient } from "@prisma/client";
 import { NextFunction, Request, Response } from "express";
 
 class AppsController {
   public apps = new PrismaClient().app;
+  public appsService = new AppsService();
 
   public getApps = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const findAllsData: App[] = await this.apps.findMany();
+      const count = await this.appsService.countApps();
 
-      res.status(200).json({ data: findAllsData, message: "Found all apps" });
+      res.status(200).json({ data: findAllsData, count, message: "Found all apps" });
     } catch (error) {
       next(error);
     }
