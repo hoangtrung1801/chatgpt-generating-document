@@ -1,0 +1,17 @@
+stages:
+    - deploy
+variables:
+  RELEASE_NAME: 'sparkplan backend'
+before_script:
+  - sudo apt update -qq
+  - sudo apt install -qq git
+deploy web:
+  stage: deploy
+  script:
+    - bash
+    - ssh $SERVER_USER@$SERVER_IP "cd $SERVER_PROJECT_DIR && bash ./deploy.sh"
+  tags:
+    - du
+  only:
+    - develop
+ 
