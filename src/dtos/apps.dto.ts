@@ -1,4 +1,5 @@
-import { IsBoolean, IsInt, IsOptional, IsString } from "class-validator";
+import { AppStatus } from "@prisma/client";
+import { IsEnum, IsInt, IsOptional, IsString } from "class-validator";
 
 export class CreateAppDto {
   @IsString()
@@ -8,9 +9,9 @@ export class CreateAppDto {
   @IsOptional()
   thumbnail: string;
 
-  @IsBoolean()
+  @IsEnum(AppStatus)
   @IsOptional()
-  status: boolean;
+  status: AppStatus;
 
   @IsInt()
   categoryId: number;

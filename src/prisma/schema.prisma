@@ -29,7 +29,7 @@ model App {
   name      String
   thumbnail String? @db.VarChar(512)
   // primaryColor String? @map("primary_color")
-  status    Boolean @default(false) @db.Bit(1)
+  status    AppStatus @default(COMING_SOON)
 
   category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   categoryId Int      @map("category_id")
@@ -42,11 +42,10 @@ model App {
 }
 
 model Category {
-  id        Int     @id @default(autoincrement())
+  id        Int            @id @default(autoincrement())
   name      String
-  thumbnail String? @db.VarChar(512)
-  // status    Boolean @default(false) @db.Bit(1)
-  status CategoryStatus @default(COMING_SOON)
+  thumbnail String?        @db.VarChar(512)
+  status    CategoryStatus @default(COMING_SOON)
 
   apps App[]
 
@@ -59,7 +58,6 @@ model Question {
   description String?      @map("question_description") @db.Text
   questionGPT String?      @map("question_gpt") @db.Text
   keyword     String?      @map("question_keyword")
-  status      Boolean      @default(true) @db.Bit(1)
   type        QuestionType
 
   app   App @relation(fields: [appId], references: [id], onDelete: Cascade)
@@ -101,9 +99,10 @@ model SelectedOption {
 model Selection {
   id          Int      @id @default(autoincrement())
   username    String   @db.VarChar(512)
-  projectName       String @map("project_name")
-  description String?   @db.Text
+  projectName String   @map("project_name")
+  description String?  @db.Text
   createdAt   DateTime @default(now()) @map("created_at")
+  // guestId     String   @map("guest_id") @db.VarChar(64)
 
   selectedOptions SelectedOption[]
 
@@ -223,7 +222,17 @@ enum EpicStatus {
 enum CategoryStatus {
   COMING_SOON
   LAUNCH
+
+  @@map("category_status")
 }
+
+enum AppStatus {
+  COMING_SOON
+  LAUNCH
+
+  @@map("app_status")
+}
+
 
 enum QuestionType {
   SINGLE
