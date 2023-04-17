@@ -120,7 +120,8 @@ model Selection {
 
   epic Epic[]
 
-  userFlow Json? @default("{}") @map("user_flow")
+  // userFlow Json? @default("{}") @map("user_flow")
+  userFlow String? @db.Text @map("user_flow")
 
   @@map("ai_selection")
 }

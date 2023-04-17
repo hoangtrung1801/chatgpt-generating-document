@@ -1,4 +1,4 @@
-import { ArrayMinSize, IsArray, IsInt, IsObject, IsOptional, IsString } from "class-validator";
+import { ArrayMinSize, IsArray, IsInt, IsOptional, IsString } from "class-validator";
 
 export class CreateSelectionDto {
   @IsInt({ each: true })
@@ -21,11 +21,14 @@ export class CreateSelectionDto {
 }
 
 export class UserFlowDto {
-  @IsObject({ each: true })
-  nodes: object[];
+  // @IsObject({ each: true })
+  // nodes: object[];
 
-  @IsObject({ each: true })
-  edges: object[];
+  // @IsObject({ each: true })
+  // edges: object[];
+
+  @IsString()
+  userFlow: string;
 }
 
 // class UserFlowNode {

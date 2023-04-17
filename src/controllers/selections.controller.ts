@@ -2,6 +2,7 @@ import { CreateSelectionDto, UserFlowDto } from "@/dtos/selections.dto";
 import { CreateUserStoryDto } from "@/dtos/user-story.dto";
 import { HttpException } from "@/exceptions/HttpException";
 import { RequestWithUser } from "@/interfaces/auth.interface";
+import ChatGPTService from "@/services/chatgpt.service";
 import SelectionService from "@/services/selections.service";
 import UserStoryService from "@/services/user-stories.service";
 import { isEmpty } from "@/utils/util";
@@ -14,6 +15,7 @@ class SelectionsController {
 
   public selectionService = new SelectionService();
   public userStoryService = new UserStoryService();
+  public chatgptService = new ChatGPTService();
 
   public getSelections = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
@@ -81,6 +83,11 @@ class SelectionsController {
     try {
       const user = req.user;
       const createSelectionData = await this.selectionService.createSelection(req.body, user.id);
+
+      await this.chatgptService.generateBrief(createSelectionData.id);
+      const userFlow = await this.chatgptService.generateUserFlow(createSelectionData.id);
+
+      createSelectionData.userFlow = userFlow;
 
       res.status(201).json({
         data: createSelectionData,

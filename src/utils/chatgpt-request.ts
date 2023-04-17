@@ -74,4 +74,26 @@ export const chatGPTRequestTodoListPrompt = async (briefPrompt: string, answered
   return response.data;
 };
 
+export const chatGPTRequestUserFlow = async (briefPrompt: string, briefAnswered: string, userFlowPrompt: string) => {
+  const response = await chatGPTRequest([
+    {
+      role: "system",
+      content: "You are expert in making software requirement document",
+    },
+    {
+      role: "user",
+      content: briefPrompt,
+    },
+    {
+      role: "assistant",
+      content: briefAnswered,
+    },
+    {
+      role: "user",
+      content: userFlowPrompt,
+    },
+  ]);
+  return response.data;
+};
+
 export default chatGPTRequest;
