@@ -6,18 +6,37 @@ import { CreateUserDto } from "@dtos/users.dto";
 import { HttpException } from "@exceptions/HttpException";
 import { DataStoredInToken, TokenData } from "@interfaces/auth.interface";
 import { isEmpty } from "@utils/util";
+import { SignUpDto } from "@/dtos/auth.dto";
 
 class AuthService {
   public users = new PrismaClient().user;
 
-  public async signup(userData: CreateUserDto): Promise<User> {
-    if (isEmpty(userData)) throw new HttpException(400, "userData is empty");
+  public async signup(signUpData: SignUpDto): Promise<User> {
+    if (isEmpty(signUpData)) throw new HttpException(400, "Sign up data is empty");
 
-    const findUser: User = await this.users.findUnique({ where: { email: userData.email } });
-    if (findUser) throw new HttpException(409, `This email ${userData.email} already exists`);
+    const findUser: User = await this.users.findUnique({ where: { email: signUpData.email } });
+    if (findUser) throw new HttpException(409, `This email ${signUpData.email} already exists`);
 
-    const hashedPassword = await hash(userData.password, 10);
-    const createUserData: Promise<User> = this.users.create({ data: { ...userData, password: hashedPassword } });
+    const guestId = signUpData.guestId || undefined;
+    if (guestId) {
+      delete signUpData.guestId;
+    }
+
+    const hashedPassword = await hash(signUpData.password, 10);
+    const createUserData = await this.users.create({ data: { ...(signUpData as CreateUserDto), password: hashedPassword } });
+
+    if (guestId) {
+      await this.users.update({
+        where: { id: createUserData.id },
+        data: {
+          selections: {
+            connect: {
+              guestId,
+            },
+          },
+        },
+      });
+    }
 
     return createUserData;
   }

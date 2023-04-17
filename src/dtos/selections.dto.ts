@@ -1,4 +1,4 @@
-import { ArrayMinSize, IsArray, IsInt, IsOptional, IsString } from "class-validator";
+import { ArrayMinSize, IsArray, IsInt, IsOptional, IsString, IsUUID } from "class-validator";
 
 export class CreateSelectionDto {
   @IsInt({ each: true })
@@ -18,6 +18,10 @@ export class CreateSelectionDto {
   @IsString()
   @IsOptional()
   description: string;
+
+  @IsUUID()
+  @IsOptional()
+  guestId: string;
 }
 
 export class UserFlowDto {

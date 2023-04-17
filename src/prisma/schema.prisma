@@ -102,7 +102,7 @@ model Selection {
   projectName String   @map("project_name")
   description String?  @db.Text
   createdAt   DateTime @default(now()) @map("created_at")
-  // guestId     String   @map("guest_id") @db.VarChar(64)
+  guestId     String?  @unique @map("guest_id") @db.VarChar(64)
 
   selectedOptions SelectedOption[]
 
