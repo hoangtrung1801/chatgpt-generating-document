@@ -82,6 +82,9 @@ class SelectionsController {
   public createSelection = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
     try {
       const user = req.user;
+
+      req.setTimeout(1000 * 120);
+
       const createSelectionData = await this.selectionService.createSelection(req.body, user.id);
 
       await this.chatgptService.generateBrief(createSelectionData.id);
