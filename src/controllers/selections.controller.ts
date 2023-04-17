@@ -83,7 +83,7 @@ class SelectionsController {
     try {
       const user = req.user;
 
-      req.setTimeout(1000 * 120);
+      req.setTimeout(1000 * 60 * 5);
 
       const createSelectionData = await this.selectionService.createSelection(req.body, user.id);
 
