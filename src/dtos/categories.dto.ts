@@ -1,4 +1,5 @@
-import { IsOptional, IsString } from "class-validator";
+import { CategoryStatus } from "@prisma/client";
+import { IsEnum, IsOptional, IsString } from "class-validator";
 
 export class CreateCategoryDto {
   @IsString()
@@ -8,7 +9,7 @@ export class CreateCategoryDto {
   @IsOptional()
   thumbnail: string;
 
-  @IsString()
+  @IsEnum(CategoryStatus)
   @IsOptional()
-  status: boolean;
+  status: CategoryStatus;
 }

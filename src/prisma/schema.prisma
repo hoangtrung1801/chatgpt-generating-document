@@ -45,7 +45,8 @@ model Category {
   id        Int     @id @default(autoincrement())
   name      String
   thumbnail String? @db.VarChar(512)
-  status    Boolean @default(false) @db.Bit(1)
+  // status    Boolean @default(false) @db.Bit(1)
+  status CategoryStatus @default(COMING_SOON)
 
   apps App[]
 
@@ -217,6 +218,11 @@ enum EpicStatus {
   ARCHIVED
 
   @@map("epic_status")
+}
+
+enum CategoryStatus {
+  COMING_SOON
+  LAUNCH
 }
 
 enum QuestionType {

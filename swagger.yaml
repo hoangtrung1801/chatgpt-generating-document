@@ -1291,22 +1291,6 @@ components:
           items:
             $ref: '#/components/schemas/Selection'
 
-    Category:
-      type: object
-      properties:
-        id:
-          type: integer
-        name:
-          type: string
-        thumbnail:
-          type: string
-        status:
-          type: boolean
-        apps:
-          description: All apps in this category
-          type: array
-          items:
-            $ref: '#/components/schemas/App'
     CreateCategory:
       type: object
       required:
@@ -1317,8 +1301,22 @@ components:
         thumbnail:
           type: string
         status:
-          type: boolean
-
+          $ref: '#/components/schemas/CategoryStatus'
+    Category:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/CreateCategory'
+      properties:
+        id:
+          type: integer
+        apps:
+          description: All apps in this category
+          type: array
+          items:
+            $ref: '#/components/schemas/App'
+    CategoryStatus:
+      type: string
+      enum: [COMING_SOON, LAUNCH]
 
 
     App:
@@ -1475,7 +1473,6 @@ components:
               items:
                 type: object
               example: [{ id: 'e1-2', source: '1', target: '2' }]
-
 
     CreateBrief:
       type: object
