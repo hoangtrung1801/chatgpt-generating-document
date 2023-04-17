@@ -1349,7 +1349,10 @@ components:
         thumbnail:
           type: string
         status:
-          type: boolean
+          $ref: '#/components/schemas/App'
+    AppStatus:
+      type: string
+      enum: [COMING_SOON, LAUNCH]
 
     CreateQuestion:
       type: object
@@ -1432,6 +1435,9 @@ components:
           type: string
         description:
           type: string
+        guestId:
+          type: string
+          description: UUID for non-register feature
     Selection:
       type: object
       allOf:
@@ -1459,20 +1465,22 @@ components:
             $ref: '#/components/schemas/Epic'
           description: All spics in selection
         userFlow:
-          type: object
-          properties:
-            nodes:
-              type: array
-              items:
-                type: object
-              example: [
-                  { id: '1', position: { x: 0, y: 0 }, data: { label: '1' } },
-                ]
-            edges:
-              type: array
-              items:
-                type: object
-              example: [{ id: 'e1-2', source: '1', target: '2' }]
+          type: string
+          description: Data in mermaid.js format
+          # type: object
+          # properties:
+          #   nodes:
+          #     type: array
+          #     items:
+          #       type: object
+          #     example: [
+          #         { id: '1', position: { x: 0, y: 0 }, data: { label: '1' } },
+          #       ]
+          #   edges:
+          #     type: array
+          #     items:
+          #       type: object
+          #     example: [{ id: 'e1-2', source: '1', target: '2' }]
 
     CreateBrief:
       type: object
@@ -1522,6 +1530,9 @@ components:
         password:
           type: string
           example: '123test'
+        guestId:
+          type: string
+          description: UUID for non-register feature
 
     CreateUserStory:
       type: object
