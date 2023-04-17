@@ -726,37 +726,11 @@ paths:
                 $ref: '#/components/schemas/Brief'
         500:
           description: 'Server Error'
-    post:
-      tags:
-        - Chatgpt
-      summary: Create brief using chatgpt
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateBrief'
-      responses:
-        200:
-          description: 'OK'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Brief'
-        500:
-          description: 'Server Error'
-
   /chatgpt/briefs/{id}:
     get:
       tags:
       - Chatgpt
       summary: Get brief by id
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
       responses:
         200:
           description: 'OK'
@@ -766,6 +740,27 @@ paths:
                 $ref: '#/components/schemas/Brief'
         500:
           description: 'Server Error'
+    post:
+      tags:
+        - Chatgpt
+      summary: Create brief using chatgpt
+      responses:
+        200:
+          description: 'OK'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Brief'
+        500:
+          description: 'Server Error'
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+
+
     # put:
     #   tags:
     #     - Selection
@@ -1424,16 +1419,18 @@ components:
       required:
       - appId
       - selectedOptions
-      - title
-      - description
+      - projectName
+      - username
       properties:
         appId:
+          type: integer
+        username:
           type: integer
         selectedOptions:
           type: array
           items:
             type: integer
-        title:
+        projectName:
           type: string
         description:
           type: string

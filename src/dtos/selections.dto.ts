@@ -1,4 +1,4 @@
-import { ArrayMinSize, IsArray, IsInt, IsObject, IsString } from "class-validator";
+import { ArrayMinSize, IsArray, IsInt, IsObject, IsOptional, IsString } from "class-validator";
 
 export class CreateSelectionDto {
   @IsInt({ each: true })
@@ -10,9 +10,13 @@ export class CreateSelectionDto {
   appId: number;
 
   @IsString()
-  title: string;
+  projectName: string;
 
   @IsString()
+  username: string;
+
+  @IsString()
+  @IsOptional()
   description: string;
 }
 

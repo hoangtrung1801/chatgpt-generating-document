@@ -99,8 +99,9 @@ model SelectedOption {
 
 model Selection {
   id          Int      @id @default(autoincrement())
-  title       String
-  description String   @db.Text
+  username    String   @db.VarChar(512)
+  projectName       String @map("project_name")
+  description String?   @db.Text
   createdAt   DateTime @default(now()) @map("created_at")
 
   selectedOptions SelectedOption[]
