@@ -81,6 +81,9 @@ class SelectionsController {
 
   public createSelection = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
     try {
+      req.setTimeout(1000 * 60 * 5);
+      res.setTimeout(1000 * 60 * 5);
+
       const user = req.user;
 
       const createSelectionData = await this.selectionService.createSelection(req.body, user.id);
