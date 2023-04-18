@@ -1,6 +1,7 @@
 import { HttpException } from "@/exceptions/HttpException";
 import { chatGPTRequestBriefPrompt, chatGPTRequestTodoListPrompt, chatGPTRequestUserFlow } from "@/utils/chatgpt-request";
 import convertMermaidToReactFlow from "@/utils/convert-mermaid-to-reactflow";
+import convertMarkdownToHTML from "@/utils/convertMarkdownToHTML";
 import { generateBriefPrompt } from "@/utils/generate-chatgpt-prompt";
 import generateUserFlowPrompt from "@/utils/generate-user-flow-prompt";
 import { PrismaClient } from "@prisma/client";
@@ -77,7 +78,12 @@ class ChatGPTService {
     });
 
     const chatGPTResponse = await chatGPTRequestBriefPrompt(briefPrompt);
-    const answer = chatGPTResponse.choices[0].message.content;
+    let answer = chatGPTResponse.choices[0].message.content;
+    answer = convertMarkdownToHTML(answer);
+
+    // answer = convertMarkdownToHTML(answer);
+    // answer = answer.replaceAll(/<\/*(html|body|)\/*>/gm, "");
+    // answer = answer.replaceAll("<!DOCTYPE html>", "");
 
     console.log("chatGPTResponse", answer);
 
