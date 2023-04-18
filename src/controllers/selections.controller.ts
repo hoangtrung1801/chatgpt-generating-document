@@ -83,8 +83,6 @@ class SelectionsController {
     try {
       const user = req.user;
 
-      req.setTimeout(1000 * 60 * 5);
-
       const createSelectionData = await this.selectionService.createSelection(req.body, user.id);
 
       await this.chatgptService.generateBrief(createSelectionData.id);
