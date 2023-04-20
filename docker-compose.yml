@@ -17,6 +17,8 @@ services:
       - db_data:/var/lib/mysql
     restart: unless-stopped
     env_file: .env.db
+    ports:
+      - "3306:3306"
   
   # phpmyadmin
   phpmyadmin:
