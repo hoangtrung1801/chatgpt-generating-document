@@ -1,22 +1,33 @@
 import { CHATGPT_API } from "@/config";
 import axios from "axios";
+import openai from "./openai";
+import { ChatCompletionRequestMessage } from "openai";
+
 const chatGPTUrl = "https://api.openai.com/v1/chat/completions";
 
-export const chatGPTRequest = async (messages: { role: string; content: string }[] = []) => {
+export const chatGPTRequest = async (messages: ChatCompletionRequestMessage[]) => {
   try {
-    const response = await axios.post(
-      chatGPTUrl,
-      {
-        model: "gpt-3.5-turbo",
-        messages,
-      },
-      {
-        headers: {
-          Authorization: CHATGPT_API,
-          "Content-Type": "application/json",
-        },
-      },
-    );
+    // const response = await axios.post(
+    //   chatGPTUrl,
+    //   {
+    //     model: "gpt-3.5-turbo",
+    //     messages,
+    //   },
+    //   {
+    //     headers: {
+    //       Authorization: CHATGPT_API,
+    //       "Content-Type": "application/json",
+    //     },
+    //   },
+    // );
+
+    const response = await openai.createChatCompletion({
+      model: "gpt-3.5-turbo-0301",
+      messages: [...messages],
+      temperature: 0.2,
+      // max_tokens: 2048,
+    });
+
     return response;
   } catch (error) {
     return error;

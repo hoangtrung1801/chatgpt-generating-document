@@ -1,11 +1,13 @@
 import { HttpException } from "@/exceptions/HttpException";
-import { chatGPTRequestBriefPrompt, chatGPTRequestTodoListPrompt, chatGPTRequestUserFlow } from "@/utils/chatgpt-request";
+import chatGPTRequest, { chatGPTRequestBriefPrompt, chatGPTRequestTodoListPrompt, chatGPTRequestUserFlow } from "@/utils/chatgpt-request";
 import convertMermaidToReactFlow from "@/utils/convert-mermaid-to-reactflow";
 import convertMarkdownToHTML from "@/utils/convertMarkdownToHTML";
+import { createFirstPrompt } from "@/utils/create-generating-document-prompts";
 import { generateBriefPrompt } from "@/utils/generate-chatgpt-prompt";
 import generateUserFlowPrompt from "@/utils/generate-user-flow-prompt";
 import { PrismaClient } from "@prisma/client";
 import { isEmpty } from "class-validator";
+import { ChatCompletionRequestMessage } from "openai";
 
 class ChatGPTService {
   public chatgptBrief = new PrismaClient().chatGPTBriefAnswer;
@@ -138,17 +140,138 @@ class ChatGPTService {
     const data = response.choices[0].message.content;
 
     const convertedData = convertMermaidToReactFlow(data);
+    console.log({ convertedData });
 
-    await this.selections.update({
+    // await this.selections.update({
+    //   where: {
+    //     id: selectionId,
+    //   },
+    //   data: {
+    //     userFlow: convertedData,
+    //   },
+    // });
+
+    return convertedData;
+  };
+
+  public generateDocument = async (selectionId: number) => {
+    const findSelection = await this.selections.findUnique({
       where: {
         id: selectionId,
       },
-      data: {
-        userFlow: convertedData,
+      include: {
+        chatGPTBriefAnswer: true,
+        app: {
+          include: {
+            questions: true,
+          },
+        },
       },
     });
+    if (!findSelection) throw new HttpException(404, "Selection not found");
 
-    return convertedData;
+    const firstPrompt = createFirstPrompt(
+      findSelection.projectName,
+      findSelection.description || "",
+      // findSelection.app.questions.map(q => q.keyword),
+      [
+        "User profile creation and management",
+        "News feed displaying content from friends and followed pages",
+        "Friend requests and messaging",
+        "Group creation and management",
+        "Pages creation and management",
+        "Like, comment, and share functionalities for posts and pages",
+        "Notifications for activity on the website",
+      ],
+    );
+
+    const body: ChatCompletionRequestMessage[] = [
+      {
+        role: "system",
+        content: "You are expert in making software requirement",
+      },
+    ];
+    body.push({
+      role: "user",
+      content: firstPrompt,
+    });
+
+    const proposalResponse = await chatGPTRequest(body);
+    console.log({ proposalResponse });
+    const proposalMessage = proposalResponse.data.choices[0].message;
+
+    body.push(proposalMessage);
+
+    console.log({ body });
+
+    this.generateDocumentInBackground(selectionId, body);
+
+    // return document;
+    return proposalMessage;
+  };
+
+  public generateDocumentInBackground = async (selectionId: number, body: ChatCompletionRequestMessage[]) => {
+    const sections = [
+      "Introduction",
+      "Project Overview",
+      "Functional Objectives",
+      "Non-functional Objectives",
+      "Project Scope",
+      "Project Plan",
+      "Budget",
+      "Conclusion",
+    ];
+    const detailSections = [];
+
+    const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+    for (let id = 0; id < sections.length; id++) {
+      await delay(id * 1000);
+      const section = sections[id];
+
+      body.push({
+        role: "user",
+        content:
+          id === 0
+            ? `Rewrite a ${section} part. It should be written in a clear and concise style, made longer, and more specific, detail. The final must be minimum 1 pages in length`
+            : `Continue with ${section} part`,
+      });
+
+      const response = await chatGPTRequest(body);
+      const message = response.data.choices[0].message;
+
+      body.push(message);
+      detailSections.push(message.content);
+      console.log({ body });
+    }
+
+    const findSelection = await this.selections.findUnique({ where: { id: selectionId } });
+
+    const document = `
+Software Requirement Specification for ${findSelection.projectName}
+
+${detailSections.join("\n\n")}
+
+`;
+
+    await this.selections.update({
+      where: { id: selectionId },
+      data: {
+        document,
+      },
+    });
+    console.log("Finished generating document");
+
+    return detailSections;
+  };
+
+  public getDocument = async (selectionId: number) => {
+    const findSelection = await this.selections.findUnique({
+      where: { id: selectionId },
+    });
+    if (!findSelection) throw new HttpException(404, "Selection not found");
+
+    return findSelection.document;
   };
 }
 

@@ -760,6 +760,28 @@ paths:
         schema:
           type: integer
 
+  /chatgpt/generate-document/{id}:
+    get:
+      tags:
+        - Chatgpt
+      summary: Get generated document of selection
+      responses:
+        200:
+          description: Ok
+    post:
+      tags:
+        - Chatgpt
+      summary: Generate document
+      responses:
+        200:
+          description: Ok
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+
 
     # put:
     #   tags:

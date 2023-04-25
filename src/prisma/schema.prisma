@@ -103,6 +103,7 @@ model Selection {
   description String?  @db.Text
   createdAt   DateTime @default(now()) @map("created_at")
   guestId     String?  @unique @map("guest_id") @db.VarChar(64)
+  document String? @db.Text
 
   selectedOptions SelectedOption[]
 

@@ -1,3 +1,5 @@
 export default function convertMermaidToReactFlow(mermaid: string) {
-  return mermaid.replace("```mermaid\n", "").replace("```", "");
+  console.log(mermaid.match(/```mermaid\s+([\s\S]+?)```/g));
+  return mermaid.replace("```mermaid\n", "").replaceAll("mermaid", "").replace("```", "");
+  // return mermaid.replaceAll("```", "").replaceAll("mermaid", "");
 }
