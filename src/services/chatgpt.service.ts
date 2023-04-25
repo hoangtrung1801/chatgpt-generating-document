@@ -7,7 +7,7 @@ import { generateBriefPrompt } from "@/utils/generate-chatgpt-prompt";
 import generateUserFlowPrompt from "@/utils/generate-user-flow-prompt";
 import { PrismaClient } from "@prisma/client";
 import { isEmpty } from "class-validator";
-import { ChatCompletionRequestMessage } from "openai";
+import { ChatCompletionRequestMessage, ChatCompletionResponseMessage } from "openai";
 
 class ChatGPTService {
   public chatgptBrief = new PrismaClient().chatGPTBriefAnswer;
@@ -126,21 +126,59 @@ class ChatGPTService {
       },
       include: {
         chatGPTBriefAnswer: true,
+        app: {
+          include: {
+            questions: true,
+          },
+        },
       },
     });
     if (!findSelection) throw new HttpException(404, "Selection not found");
 
-    if (!findSelection.chatGPTBriefAnswer) throw new HttpException(404, "Please generate a brief first");
-
-    const response = await chatGPTRequestUserFlow(
-      findSelection.chatGPTBriefAnswer.prompt,
-      findSelection.chatGPTBriefAnswer.answer,
-      generateUserFlowPrompt(),
+    const userFlowPrompt = generateUserFlowPrompt(
+      findSelection.projectName,
+      findSelection.description,
+      findSelection.app.questions.map(question => question.name),
     );
-    const data = response.choices[0].message.content;
 
-    const convertedData = convertMermaidToReactFlow(data);
-    console.log({ convertedData });
+    const body: ChatCompletionRequestMessage[] = [
+      {
+        role: "system",
+        content: "You are expert in making software requirement",
+      },
+    ];
+    body.push({
+      role: "user",
+      content: userFlowPrompt,
+    });
+
+    const response = await chatGPTRequest(body);
+    const message: ChatCompletionResponseMessage = response.data.choices[0].message;
+    const mermaid = message.content;
+
+    let finalMermaid = mermaid.match(/```mermaid(\s+([\s\S]+?))```/gi)[0];
+    finalMermaid = finalMermaid.replaceAll("```mermaid", "").replaceAll("```", "");
+
+    await this.selections.update({
+      where: {
+        id: selectionId,
+      },
+      data: {
+        userFlow: mermaid,
+      },
+    });
+
+    // if (!findSelection.chatGPTBriefAnswer) throw new HttpException(404, "Please generate a brief first");
+
+    // const response = await chatGPTRequestUserFlow(
+    //   findSelection.chatGPTBriefAnswer.prompt,
+    //   findSelection.chatGPTBriefAnswer.answer,
+    //   generateUserFlowPrompt(),
+    // );
+    // const data = response.choices[0].message.content;
+
+    // const convertedData = convertMermaidToReactFlow(data);
+    // console.log({ convertedData });
 
     // await this.selections.update({
     //   where: {
@@ -151,7 +189,7 @@ class ChatGPTService {
     //   },
     // });
 
-    return convertedData;
+    return finalMermaid;
   };
 
   public generateDocument = async (selectionId: number) => {
@@ -197,16 +235,12 @@ class ChatGPTService {
     });
 
     const proposalResponse = await chatGPTRequest(body);
-    console.log({ proposalResponse });
     const proposalMessage = proposalResponse.data.choices[0].message;
 
     body.push(proposalMessage);
 
-    console.log({ body });
-
     this.generateDocumentInBackground(selectionId, body);
 
-    // return document;
     return proposalMessage;
   };
 

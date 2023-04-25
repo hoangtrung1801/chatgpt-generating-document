@@ -88,10 +88,10 @@ class SelectionsController {
 
       const createSelectionData = await this.selectionService.createSelection(req.body, user.id);
 
-      await this.chatgptService.generateBrief(createSelectionData.id);
-      const userFlow = await this.chatgptService.generateUserFlow(createSelectionData.id);
+      // await this.chatgptService.generateBrief(createSelectionData.id);
+      // const userFlow = await this.chatgptService.generateUserFlow(createSelectionData.id);
 
-      createSelectionData.userFlow = userFlow;
+      // createSelectionData.userFlow = userFlow;
 
       res.status(201).json({
         data: createSelectionData,
