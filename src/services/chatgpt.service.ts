@@ -260,7 +260,7 @@ class ChatGPTService {
     const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
     for (let id = 0; id < sections.length; id++) {
-      await delay(id * 1000);
+      await delay(id * 15000);
       const section = sections[id];
 
       body.push({
@@ -281,12 +281,13 @@ class ChatGPTService {
 
     const findSelection = await this.selections.findUnique({ where: { id: selectionId } });
 
-    const document = `
+    let document = `
 Software Requirement Specification for ${findSelection.projectName}
 
 ${detailSections.join("\n\n")}
 
 `;
+    document = convertMarkdownToHTML(document); // convert markdown to HTMLJ
 
     await this.selections.update({
       where: { id: selectionId },
