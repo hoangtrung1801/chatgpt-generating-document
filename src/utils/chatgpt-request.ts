@@ -2,36 +2,40 @@ import { CHATGPT_API } from "@/config";
 import axios from "axios";
 import openai from "./openai";
 import { ChatCompletionRequestMessage } from "openai";
+import { PrismaClient } from "@prisma/client";
 
 const chatGPTUrl = "https://api.openai.com/v1/chat/completions";
+const chatgptKeys = new PrismaClient().chatGPTKey;
 
 export const chatGPTRequest = async (messages: ChatCompletionRequestMessage[]) => {
-  try {
-    // const response = await axios.post(
-    //   chatGPTUrl,
-    //   {
-    //     model: "gpt-3.5-turbo",
-    //     messages,
-    //   },
-    //   {
-    //     headers: {
-    //       Authorization: CHATGPT_API,
-    //       "Content-Type": "application/json",
-    //     },
-    //   },
-    // );
+  const chatgptKey = await chatgptKeys.findFirst({ where: { isRunning: false } });
+  if (!chatgptKey) {
+    throw new Error("No chatgpt key available");
+  }
 
-    const response = await openai.createChatCompletion({
+  await chatgptKeys.update({
+    where: { id: chatgptKey.id },
+    data: { isRunning: true },
+  });
+
+  let response;
+  try {
+    response = await openai.createChatCompletion({
       model: "gpt-3.5-turbo-0301",
       messages: [...messages],
       temperature: 0.2,
       // max_tokens: 2048,
     });
-
-    return response;
   } catch (error) {
-    return error;
+    console.log({ response });
   }
+
+  await chatgptKeys.update({
+    where: { id: chatgptKey.id },
+    data: { isRunning: true },
+  });
+
+  return response;
 };
 
 export const chatGPTRequestBriefPrompt = async (briefPrompt: string) => {

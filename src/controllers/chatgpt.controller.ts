@@ -152,6 +152,25 @@ class ChatGPTController {
     }
   };
 
+  public generatePartOfDocument = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const selectionId = Number(req.params.selectionId);
+      if (!selectionId) throw new HttpException(400, "SelectionId does not exist");
+
+      const partId = req.params.partId;
+      if (!partId) throw new HttpException(400, "PartId does not exist");
+
+      const data = await this.chatgptService.generatePartOfDocument(selectionId, partId);
+
+      res.status(200).json({
+        data,
+        message: "generated part of document",
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
   public getDocument = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const selectionId = Number(req.params.selectionId);

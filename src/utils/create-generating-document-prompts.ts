@@ -1,4 +1,28 @@
-export function createFirstPrompt(softwareName: string, description: string, features: string[]) {
+import { Selection } from "@prisma/client";
+
+export const OUTLINE_OF_DOCUMENT = [
+  "Introduction",
+  "Project Overview",
+  "Functional Objectives",
+  "Non-functional Objectives",
+  "Project Scope",
+  "Project Plan",
+  "Budget",
+  "Conclusion",
+];
+
+export function createOutline(selection: Selection) {
+  const tableOfContent = OUTLINE_OF_DOCUMENT.map((title, id) => `${id + 1}. ${title}:`).join("\n");
+
+  return `
+Software Requirement Specification for ${selection.projectName}
+
+Table of Contents
+${tableOfContent}
+  `;
+}
+
+export function createOutlinePrompt(softwareName: string, description: string, features: string[]) {
   return `
 Using the information I provide, you should generate a proposal document in a word processing format with the following sections:
 

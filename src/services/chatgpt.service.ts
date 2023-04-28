@@ -1,17 +1,20 @@
+import { ORIGIN } from "@/config";
 import { HttpException } from "@/exceptions/HttpException";
-import chatGPTRequest, { chatGPTRequestBriefPrompt, chatGPTRequestTodoListPrompt, chatGPTRequestUserFlow } from "@/utils/chatgpt-request";
-import convertMermaidToReactFlow from "@/utils/convert-mermaid-to-reactflow";
+import chatGPTRequest, { chatGPTRequestBriefPrompt, chatGPTRequestTodoListPrompt } from "@/utils/chatgpt-request";
 import convertMarkdownToHTML from "@/utils/convertMarkdownToHTML";
-import { createFirstPrompt } from "@/utils/create-generating-document-prompts";
+import { OUTLINE_OF_DOCUMENT, createOutline, createOutlinePrompt } from "@/utils/create-generating-document-prompts";
 import { generateBriefPrompt } from "@/utils/generate-chatgpt-prompt";
 import generateUserFlowPrompt from "@/utils/generate-user-flow-prompt";
 import { PrismaClient } from "@prisma/client";
+import { responseEncoding } from "axios";
 import { isEmpty } from "class-validator";
 import { ChatCompletionRequestMessage, ChatCompletionResponseMessage } from "openai";
 
 class ChatGPTService {
   public chatgptBrief = new PrismaClient().chatGPTBriefAnswer;
   public selections = new PrismaClient().selection;
+  public chatgptKey = new PrismaClient().chatGPTKey;
+  public subDocuments = new PrismaClient().subDocument;
 
   public async test() {
     return {};
@@ -192,7 +195,108 @@ class ChatGPTService {
     return finalMermaid;
   };
 
+  // public generateDocument = async (selectionId: number) => {
+  //   const findSelection = await this.selections.findUnique({
+  //     where: {
+  //       id: selectionId,
+  //     },
+  //     include: {
+  //       chatGPTBriefAnswer: true,
+  //       app: {
+  //         include: {
+  //           questions: true,
+  //         },
+  //       },
+  //     },
+  //   });
+  //   if (!findSelection) throw new HttpException(404, "Selection not found");
+
+  //   const firstPrompt = createFirstPrompt(
+  //     findSelection.projectName,
+  //     findSelection.description || "",
+  //     // findSelection.app.questions.map(q => q.keyword),
+  //     [
+  //       "User profile creation and management",
+  //       "News feed displaying content from friends and followed pages",
+  //       "Friend requests and messaging",
+  //       "Group creation and management",
+  //       "Pages creation and management",
+  //       "Like, comment, and share functionalities for posts and pages",
+  //       "Notifications for activity on the website",
+  //     ],
+  //   );
+
+  //   const body: ChatCompletionRequestMessage[] = [
+  //     {
+  //       role: "system",
+  //       content: "You are expert in making software requirement",
+  //     },
+  //   ];
+  //   body.push({
+  //     role: "user",
+  //     content: firstPrompt,
+  //   });
+
+  //   const proposalResponse = await chatGPTRequest(body);
+  //   const proposalMessage = proposalResponse.data.choices[0].message;
+
+  //   body.push(proposalMessage);
+
+  //   this.generateDocumentInBackground(selectionId, body);
+
+  //   return proposalMessage;
+  // };
+
   public generateDocument = async (selectionId: number) => {
+    try {
+      const findSelection = await this.selections.findUnique({
+        where: {
+          id: selectionId,
+        },
+        include: {
+          chatGPTBriefAnswer: true,
+          app: {
+            include: {
+              questions: true,
+            },
+          },
+        },
+      });
+      if (!findSelection) throw new HttpException(404, "Selection not found");
+
+      // return outline
+      const outline = createOutline(findSelection);
+
+      // create each sub document for each part
+      await this.subDocuments.createMany({
+        data: OUTLINE_OF_DOCUMENT.map((outline, id) => ({
+          part: String(id + 1),
+          title: outline,
+          selectionId,
+        })),
+      });
+
+      // get next parts
+      const notGenSubDocuments = await this.subDocuments.findMany({
+        where: {
+          selectionId,
+        },
+      });
+      const nextPart = notGenSubDocuments.map(subDocument => ({
+        part: subDocument.part,
+        url: `/chatgpt/generate-document/${selectionId}/part/${subDocument.part}`,
+      }));
+
+      return {
+        outline,
+        nextPart,
+      };
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  public generatePartOfDocument = async (selectionId: number, partId: string) => {
     const findSelection = await this.selections.findUnique({
       where: {
         id: selectionId,
@@ -208,40 +312,82 @@ class ChatGPTService {
     });
     if (!findSelection) throw new HttpException(404, "Selection not found");
 
-    const firstPrompt = createFirstPrompt(
-      findSelection.projectName,
-      findSelection.description || "",
-      // findSelection.app.questions.map(q => q.keyword),
-      [
-        "User profile creation and management",
-        "News feed displaying content from friends and followed pages",
-        "Friend requests and messaging",
-        "Group creation and management",
-        "Pages creation and management",
-        "Like, comment, and share functionalities for posts and pages",
-        "Notifications for activity on the website",
-      ],
-    );
+    const subDocument = await this.subDocuments.findFirst({
+      where: {
+        selectionId,
+        part: partId,
+      },
+    });
+    if (!subDocument) throw new HttpException(404, "Sub document not found");
+    if (subDocument.isGenerating) throw new HttpException(400, "Sub document is generating");
 
+    // update is_generating status
+    await this.subDocuments.update({
+      where: { id: subDocument.id },
+      data: { isGenerating: true },
+    });
+
+    // request generating part of document
     const body: ChatCompletionRequestMessage[] = [
       {
         role: "system",
         content: "You are expert in making software requirement",
       },
+      {
+        role: "user",
+        content: createOutlinePrompt(findSelection.projectName, findSelection.description, [
+          "User profile creation and management",
+          "News feed displaying content from friends and followed pages",
+          "Friend requests and messaging",
+          "Group creation and management",
+          "Pages creation and management",
+          "Like, comment, and share functionalities for posts and pages",
+          "Notifications for activity on the website",
+        ]),
+      },
+      {
+        role: "user",
+        content: `Rewrite a ${subDocument.title} part. It should be written in a clear and concise style, made longer, and more specific, detail. The final must be minimum 1 pages in length.`,
+      },
     ];
-    body.push({
-      role: "user",
-      content: firstPrompt,
+
+    const response = await chatGPTRequest(body);
+    const message = response.data.choices[0].message;
+
+    // DONE
+
+    // update it in sub document table
+    await this.subDocuments.update({
+      where: {
+        id: subDocument.id,
+      },
+      data: {
+        content: message.content,
+        isGenerating: false,
+      },
     });
 
-    const proposalResponse = await chatGPTRequest(body);
-    const proposalMessage = proposalResponse.data.choices[0].message;
+    // get next parts
+    const notGenSubDocuments = await this.subDocuments.findMany({
+      where: {
+        selectionId,
+        content: {
+          equals: null,
+        },
+        isGenerating: {
+          not: true,
+        },
+      },
+    });
+    const nextPart = notGenSubDocuments.map(subDocument => ({
+      part: subDocument.part,
+      url: `/chatgpt/generate-document/${selectionId}/part/${subDocument.part}`,
+    }));
 
-    body.push(proposalMessage);
-
-    this.generateDocumentInBackground(selectionId, body);
-
-    return proposalMessage;
+    return {
+      content: message.content,
+      nextPart: nextPart,
+    };
   };
 
   public generateDocumentInBackground = async (selectionId: number, body: ChatCompletionRequestMessage[]) => {
@@ -307,6 +453,10 @@ ${detailSections.join("\n\n")}
     if (!findSelection) throw new HttpException(404, "Selection not found");
 
     return findSelection.document;
+  };
+
+  private createSubDocument = async (selectionId: number, outline: string) => {
+    // await this.subDocuments.create({});
   };
 }
 

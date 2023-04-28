@@ -22,8 +22,8 @@ class ChatGPTRoute implements Routes {
     this.router.get(`${this.path}/questions`, this.chatgptController.getQuestionAnswers);
 
     this.router.get(`${this.path}/generate-document/:selectionId`, this.chatgptController.getDocument);
-
     this.router.post(`${this.path}/generate-document/:selectionId`, this.chatgptController.generateDocument);
+    this.router.post(`${this.path}/generate-document/:selectionId/part/:partId`, this.chatgptController.generatePartOfDocument);
 
     this.router.post(`${this.path}/briefs/:id/user-stories`, this.chatgptController.generateUserStoryList);
 
