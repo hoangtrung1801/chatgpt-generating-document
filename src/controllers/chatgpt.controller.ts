@@ -160,10 +160,10 @@ class ChatGPTController {
       const partId = req.params.partId;
       if (!partId) throw new HttpException(400, "PartId does not exist");
 
-      const data = await this.chatgptService.generatePartOfDocument(selectionId, partId);
+      // const data = await this.chatgptService.generatePartOfDocument(selectionId, partId);
 
       res.status(200).json({
-        data,
+        // data,
         message: "generated part of document",
       });
     } catch (error) {

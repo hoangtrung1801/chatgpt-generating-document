@@ -1,41 +1,57 @@
 import { CHATGPT_API } from "@/config";
 import axios from "axios";
 import openai from "./openai";
-import { ChatCompletionRequestMessage } from "openai";
+import { ChatCompletionRequestMessage, Configuration, OpenAIApi } from "openai";
 import { PrismaClient } from "@prisma/client";
 
-const chatGPTUrl = "https://api.openai.com/v1/chat/completions";
-const chatgptKeys = new PrismaClient().chatGPTKey;
-
 export const chatGPTRequest = async (messages: ChatCompletionRequestMessage[]) => {
-  const chatgptKey = await chatgptKeys.findFirst({ where: { isRunning: false } });
-  if (!chatgptKey) {
-    throw new Error("No chatgpt key available");
-  }
-
-  await chatgptKeys.update({
-    where: { id: chatgptKey.id },
-    data: { isRunning: true },
-  });
-
-  let response;
   try {
-    response = await openai.createChatCompletion({
+    // const response = await axios.post(
+    //   chatGPTUrl,
+    //   {
+    //     model: "gpt-3.5-turbo",
+    //     messages,
+    //   },
+    //   {
+    //     headers: {
+    //       Authorization: CHATGPT_API,
+    //       "Content-Type": "application/json",
+    //     },
+    //   },
+    // );
+
+    const response = await openai.createChatCompletion({
       model: "gpt-3.5-turbo-0301",
       messages: [...messages],
       temperature: 0.2,
       // max_tokens: 2048,
     });
+
+    return response;
   } catch (error) {
-    console.log({ response });
+    return error;
   }
+};
 
-  await chatgptKeys.update({
-    where: { id: chatgptKey.id },
-    data: { isRunning: true },
-  });
+export const chatGPTRequestWithKey = async (key: string, messages: ChatCompletionRequestMessage[]) => {
+  try {
+    const config = new Configuration({
+      apiKey: key,
+    });
 
-  return response;
+    const openai = new OpenAIApi(config);
+
+    const response = await openai.createChatCompletion({
+      model: "gpt-3.5-turbo-0301",
+      messages: [...messages],
+      temperature: 0.2,
+      // max_tokens: 2048,
+    });
+
+    return response;
+  } catch (error) {
+    return error;
+  }
 };
 
 export const chatGPTRequestBriefPrompt = async (briefPrompt: string) => {
