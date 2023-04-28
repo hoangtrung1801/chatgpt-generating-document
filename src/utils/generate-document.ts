@@ -3,6 +3,7 @@ import { ChatCompletionRequestMessage } from "openai";
 import { chatGPTRequestWithKey } from "./chatgpt-request";
 import { OUTLINE_OF_DOCUMENT, createOutline, createOutlinePrompt } from "./create-generating-document-prompts";
 import convertMarkdownToHTML from "./convertMarkdownToHTML";
+import { highLightDocument } from "./highlight-document";
 
 const chatgptKey = new PrismaClient().chatGPTKey;
 const selectionPrisma = new PrismaClient().selection;
@@ -41,6 +42,8 @@ ${createOutline(selection)}
 
 ${data.flat().join("\n\n")}
   `;
+
+  document = highLightDocument(document);
   document = convertMarkdownToHTML(document);
   //   console.log({ document });
 
