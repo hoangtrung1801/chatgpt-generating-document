@@ -356,6 +356,13 @@ class ChatGPTService {
       });
       if (!findSelection) throw new HttpException(404, "Selection not found");
 
+      const countKeyIsFree = await this.chatgptKey.count({
+        where: {
+          isRunning: false,
+        },
+      });
+      if (countKeyIsFree < 1) throw new HttpException(400, "Please try again after a minutes. All keys are running");
+
       generatePartsInDocument(findSelection);
 
       // return outline

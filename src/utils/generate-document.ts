@@ -32,11 +32,14 @@ export async function generatePartsInDocument(selection: Selection) {
     },
   });
   // begin
-  //   const begin = Date.now();
+
+  const begin = Date.now();
   //   console.log({ selection });
   //   console.log("begin");
 
-  const data = await Promise.all([generate(selection, keys[0], 0, 4), generate(selection, keys[1], 4, 8)]);
+  // const data = await Promise.all([generate(selection, keys[0], 0, 4), generate(selection, keys[1], 4, 8)]);
+  const amount = Math.ceil(OUTLINE_OF_DOCUMENT.length / keys.length);
+  const data = await Promise.all(keys.map((key, id) => generate(selection, key, id * amount, (id + 1) * amount)));
   let document = `
 ${createOutline(selection)}
 
@@ -55,8 +58,9 @@ ${data.flat().join("\n\n")}
   });
 
   //   console.log("end");
-  //   const end = Date.now();
-  //   console.log(`Time: ${end - begin}ms`);
+  const end = Date.now();
+  console.log(`Time generating document: ${end - begin}ms`);
+
   // done
   await chatgptKey.updateMany({
     where: {
@@ -73,7 +77,8 @@ ${data.flat().join("\n\n")}
 async function generate(selection: Selection, chatgptKey: ChatGPTKey, from: number, to: number) {
   const result = [];
 
-  for (const outline of OUTLINE_OF_DOCUMENT.slice(from, to)) {
+  for (const outline of OUTLINE_OF_DOCUMENT.slice(from, to > OUTLINE_OF_DOCUMENT.length ? OUTLINE_OF_DOCUMENT.length : to)) {
+    console.log(outline);
     let response;
     do {
       const body: ChatCompletionRequestMessage[] = [
