@@ -37,7 +37,6 @@ export async function generatePartsInDocument(selection: Selection) {
   //   console.log({ selection });
   //   console.log("begin");
 
-  // const data = await Promise.all([generate(selection, keys[0], 0, 4), generate(selection, keys[1], 4, 8)]);
   const amount = Math.ceil(OUTLINE_OF_DOCUMENT.length / keys.length);
   const data = await Promise.all(keys.map((key, id) => generate(selection, key, id * amount, (id + 1) * amount)));
   let document = `
@@ -46,9 +45,9 @@ ${createOutline(selection)}
 ${data.flat().join("\n\n")}
   `;
 
+  console.log({ document });
   document = highLightDocument(document);
   document = convertMarkdownToHTML(document);
-  //   console.log({ document });
 
   await selectionPrisma.update({
     where: { id: selection.id },
@@ -100,13 +99,13 @@ async function generate(selection: Selection, chatgptKey: ChatGPTKey, from: numb
         },
         {
           role: "user",
-          content: `Rewrite a ${outline} part. It should be written in a clear and concise style, made longer, and more specific, detail. The final must be minimum 1 pages in length.`,
+          content: `Rewrite a ${outline} part. It should be written in a clear and concise style, made longer, and more specific, detail. The final must be in markdown format and minimum 1 pages in length.`,
         },
       ];
       response = await chatGPTRequestWithKey(chatgptKey.key, body);
 
       if (response.status === 429) {
-        console.log("Erorr: react limit request");
+        console.log("Error: react limit request");
       }
 
       // if it reach limit request
