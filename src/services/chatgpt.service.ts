@@ -1,13 +1,11 @@
-import { ORIGIN } from "@/config";
 import { HttpException } from "@/exceptions/HttpException";
 import chatGPTRequest, { chatGPTRequestBriefPrompt, chatGPTRequestTodoListPrompt } from "@/utils/chatgpt-request";
 import convertMarkdownToHTML from "@/utils/convertMarkdownToHTML";
-import { OUTLINE_OF_DOCUMENT, createOutline, createOutlinePrompt } from "@/utils/create-generating-document-prompts";
+import { createOutline } from "@/utils/create-generating-document-prompts";
 import { generateBriefPrompt } from "@/utils/generate-chatgpt-prompt";
-import { generatePartsInDocument } from "@/utils/generate-document";
+import { generateFullyDocument } from "@/utils/generate-document";
 import generateUserFlowPrompt from "@/utils/generate-user-flow-prompt";
 import { PrismaClient } from "@prisma/client";
-import { responseEncoding } from "axios";
 import { isEmpty } from "class-validator";
 import { ChatCompletionRequestMessage, ChatCompletionResponseMessage } from "openai";
 
@@ -362,7 +360,8 @@ class ChatGPTService {
     });
     if (countKeyIsFree < 1) throw new HttpException(400, "Please try again after a minutes. All keys are running");
 
-    generatePartsInDocument(findSelection);
+    // generatePartsInDocument(findSelection);
+    generateFullyDocument(findSelection);
 
     // return outline
     const outline = createOutline(findSelection);
