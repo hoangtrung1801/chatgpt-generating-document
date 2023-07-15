@@ -58,7 +58,7 @@ class SelectionsController {
       const user = req.user;
       const findCurrentUserSelections = await this.selectionService.findCurrentUserSelections(user.id);
 
-      res.status(201).json({
+      res.status(200).json({
         data: findCurrentUserSelections,
         message: "get current user's selections",
       });

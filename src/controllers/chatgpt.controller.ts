@@ -138,9 +138,6 @@ class ChatGPTController {
   public generateDocument = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const selectionId = Number(req.params.selectionId);
-      console.log({ selectionId });
-      if (!selectionId) throw new HttpException(400, "SelectionId does not exist");
-
       const document = await this.chatgptService.generateDocument(selectionId);
 
       res.status(200).json({

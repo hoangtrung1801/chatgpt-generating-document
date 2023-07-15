@@ -2,7 +2,6 @@ import { ChatGPTKey, PrismaClient, Selection } from "@prisma/client";
 import { ChatCompletionRequestMessage } from "openai";
 import { chatGPTRequestWithKey } from "./chatgpt-request";
 import { OUTLINE_OF_DOCUMENT, createOutline, createOutlinePrompt } from "./create-generating-document-prompts";
-import convertMarkdownToHTML from "./convertMarkdownToHTML";
 import { highLightDocument } from "./highlight-document";
 
 const chatgptKey = new PrismaClient().chatGPTKey;
@@ -14,12 +13,6 @@ export async function generatePartsInDocument(selection: Selection) {
       isRunning: false,
     },
   });
-
-  if (keys.length === 0) {
-    console.log("No key available");
-    return;
-    // throw new Error("No key available");
-  }
 
   await chatgptKey.updateMany({
     where: {
@@ -47,7 +40,9 @@ ${data.flat().join("\n\n")}
 
   console.log({ document });
   document = highLightDocument(document);
-  document = convertMarkdownToHTML(document);
+  // document = convertMarkdownToHTML(document);
+
+  console.log({ document });
 
   await selectionPrisma.update({
     where: { id: selection.id },

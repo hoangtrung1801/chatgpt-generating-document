@@ -340,40 +340,36 @@ class ChatGPTService {
   // };
 
   public generateDocument = async (selectionId: number) => {
-    try {
-      const findSelection = await this.selections.findUnique({
-        where: {
-          id: selectionId,
-        },
-        include: {
-          chatGPTBriefAnswer: true,
-          app: {
-            include: {
-              questions: true,
-            },
+    const findSelection = await this.selections.findUnique({
+      where: {
+        id: selectionId,
+      },
+      include: {
+        chatGPTBriefAnswer: true,
+        app: {
+          include: {
+            questions: true,
           },
         },
-      });
-      if (!findSelection) throw new HttpException(404, "Selection not found");
+      },
+    });
+    if (!findSelection) throw new HttpException(404, "Selection not found");
 
-      const countKeyIsFree = await this.chatgptKey.count({
-        where: {
-          isRunning: false,
-        },
-      });
-      if (countKeyIsFree < 1) throw new HttpException(400, "Please try again after a minutes. All keys are running");
+    const countKeyIsFree = await this.chatgptKey.count({
+      where: {
+        isRunning: false,
+      },
+    });
+    if (countKeyIsFree < 1) throw new HttpException(400, "Please try again after a minutes. All keys are running");
 
-      generatePartsInDocument(findSelection);
+    generatePartsInDocument(findSelection);
 
-      // return outline
-      const outline = createOutline(findSelection);
+    // return outline
+    const outline = createOutline(findSelection);
 
-      return {
-        outline,
-      };
-    } catch (error) {
-      console.log(error);
-    }
+    return {
+      outline,
+    };
   };
 
   public generateDocumentInBackground = async (selectionId: number, body: ChatCompletionRequestMessage[]) => {
