@@ -1,4 +1,4 @@
-import { CreateSelectionDto, UserFlowDto } from "@/dtos/selections.dto";
+import { CreateSelectionDto, SelectionDto, UserFlowDto } from "@/dtos/selections.dto";
 import { CreateUserStoryDto } from "@/dtos/user-story.dto";
 import { HttpException } from "@/exceptions/HttpException";
 import { RequestWithUser } from "@/interfaces/auth.interface";
@@ -108,7 +108,7 @@ class SelectionsController {
       const findSelectionData = await this.selections.findUnique({ where: { id: selectionId } });
       if (!findSelectionData) throw new HttpException(400, "Selection does not exist");
 
-      const selectionData: Partial<CreateSelectionDto> = req.body;
+      const selectionData: Partial<SelectionDto> = req.body;
 
       const updateSelectionData = await this.selections.update({
         where: {

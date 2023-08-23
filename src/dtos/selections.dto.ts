@@ -1,3 +1,4 @@
+import {} from "class-transformer";
 import { ArrayMinSize, IsArray, IsInt, IsOptional, IsString, IsUUID } from "class-validator";
 
 export class CreateSelectionDto {
@@ -22,6 +23,12 @@ export class CreateSelectionDto {
   @IsUUID()
   @IsOptional()
   guestId: string;
+}
+
+export class SelectionDto extends CreateSelectionDto {
+  @IsString()
+  @IsOptional()
+  document: string;
 }
 
 export class UserFlowDto {

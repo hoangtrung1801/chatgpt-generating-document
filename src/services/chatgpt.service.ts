@@ -1,7 +1,7 @@
 import { HttpException } from "@/exceptions/HttpException";
-import chatGPTRequest, { chatGPTRequestBriefPrompt, chatGPTRequestTodoListPrompt } from "@/utils/chatgpt-request";
+import chatGPTRequest, { chatGPTRequestBriefPrompt, chatGPTRequestTodoListPrompt, chatGPTRequestWithKey } from "@/utils/chatgpt-request";
 import convertMarkdownToHTML from "@/utils/convertMarkdownToHTML";
-import { createOutline } from "@/utils/create-generating-document-prompts";
+import { createOutline, createOutlinePrompt } from "@/utils/create-generating-document-prompts";
 import { generateBriefPrompt } from "@/utils/generate-chatgpt-prompt";
 import { generateFullyDocument } from "@/utils/generate-document";
 import generateUserFlowPrompt from "@/utils/generate-user-flow-prompt";
@@ -243,99 +243,130 @@ class ChatGPTService {
   //   }
   // };
 
-  // public generatePartOfDocument = async (selectionId: number, partId: string) => {
-  //   const findSelection = await this.selections.findUnique({
-  //     where: {
-  //       id: selectionId,
-  //     },
-  //     include: {
-  //       chatGPTBriefAnswer: true,
-  //       app: {
-  //         include: {
-  //           questions: true,
-  //         },
-  //       },
-  //     },
-  //   });
-  //   if (!findSelection) throw new HttpException(404, "Selection not found");
+  public generatePartOfDocument = async (selectionId: number, partIndex: number) => {
+    const findSelection = await this.selections.findUnique({
+      where: {
+        id: selectionId,
+      },
+      include: {
+        chatGPTBriefAnswer: true,
+        app: {
+          include: {
+            questions: true,
+          },
+        },
+      },
+    });
+    if (!findSelection) throw new HttpException(404, "Selection not found");
 
-  //   const subDocument = await this.subDocuments.findFirst({
-  //     where: {
-  //       selectionId,
-  //       part: partId,
-  //     },
-  //   });
-  //   if (!subDocument) throw new HttpException(404, "Sub document not found");
-  //   if (subDocument.isGenerating) throw new HttpException(400, "Sub document is generating");
+    const keys = await this.chatgptKey.findMany({
+      where: {
+        isRunning: false,
+      },
+    });
+    if (keys.length < 1) throw new HttpException(400, "Please try again after a minutes. All keys are running");
 
-  //   // update is_generating status
-  //   await this.subDocuments.update({
-  //     where: { id: subDocument.id },
-  //     data: { isGenerating: true },
-  //   });
+    const chatgptKey = keys[0];
+    await this.chatgptKey.update({
+      where: {
+        id: chatgptKey.id,
+      },
+      data: {
+        isRunning: true,
+      },
+    });
 
-  //   // request generating part of document
-  //   const body: ChatCompletionRequestMessage[] = [
-  //     {
-  //       role: "system",
-  //       content: "You are expert in making software requirement",
-  //     },
-  //     {
-  //       role: "user",
-  //       content: createOutlinePrompt(findSelection.projectName, findSelection.description, [
-  //         "User profile creation and management",
-  //         "News feed displaying content from friends and followed pages",
-  //         "Friend requests and messaging",
-  //         "Group creation and management",
-  //         "Pages creation and management",
-  //         "Like, comment, and share functionalities for posts and pages",
-  //         "Notifications for activity on the website",
-  //       ]),
-  //     },
-  //     {
-  //       role: "user",
-  //       content: `Rewrite a ${subDocument.title} part. It should be written in a clear and concise style, made longer, and more specific, detail. The final must be minimum 1 pages in length.`,
-  //     },
-  //   ];
+    // const subDocument = await this.subDocuments.findFirst({
+    //   where: {
+    //     selectionId,
+    //     part: partId,
+    //   },
+    // });
+    // if (!subDocument) throw new HttpException(404, "Sub document not found");
+    // if (subDocument.isGenerating) throw new HttpException(400, "Sub document is generating");
 
-  //   const response = await chatGPTRequest(body);
-  //   const message = response.data.choices[0].message;
+    // update is_generating status
+    // await this.subDocuments.update({
+    //   where: { id: subDocument.id },
+    //   data: { isGenerating: true },
+    // });
 
-  //   // DONE
+    // request generating part of document
+    const body: ChatCompletionRequestMessage[] = [
+      {
+        role: "system",
+        content: "You are expert in making software requirement",
+      },
+      {
+        role: "user",
+        content: createOutlinePrompt(findSelection.projectName, findSelection.description, [
+          "User profile creation and management",
+          "News feed displaying content from friends and followed pages",
+          "Friend requests and messaging",
+          "Group creation and management",
+          "Pages creation and management",
+          "Like, comment, and share functionalities for posts and pages",
+          "Notifications for activity on the website",
+        ]),
+      },
+      {
+        role: "user",
+        content: `Rewrite part ${partIndex}. It should be written in a clear and concise style, made longer, and more specific, detail. The final must be minimum 1 pages in length and in markdown format.`,
+      },
+    ];
 
-  //   // update it in sub document table
-  //   await this.subDocuments.update({
-  //     where: {
-  //       id: subDocument.id,
-  //     },
-  //     data: {
-  //       content: message.content,
-  //       isGenerating: false,
-  //     },
-  //   });
+    console.log(body);
+    console.log("BEGIN generating part", partIndex);
+    const response = await chatGPTRequestWithKey(chatgptKey.key, body);
+    const message = response.data.choices[0].message;
+    console.log("END generating part", partIndex);
 
-  //   // get next parts
-  //   const notGenSubDocuments = await this.subDocuments.findMany({
-  //     where: {
-  //       selectionId,
-  //       content: {
-  //         equals: null,
-  //       },
-  //       isGenerating: {
-  //         not: true,
-  //       },
-  //     },
-  //   });
-  //   const nextPart = notGenSubDocuments.map(subDocument => ({
-  //     part: subDocument.part,
-  //     url: `/chatgpt/generate-document/${selectionId}/part/${subDocument.part}`,
-  //   }));
+    console.log(partIndex, { message });
 
-  //   return {
-  //     content: message.content,
-  //     nextPart: nextPart,
-  //   };
-  // };
+    // DONE
+
+    // update it in sub document table
+    // await this.subDocuments.update({
+    //   where: {
+    //     id: subDocument.id,
+    //   },
+    //   data: {
+    //     content: message.content,
+    //     isGenerating: false,
+    //   },
+    // });
+
+    // get next parts
+    // const notGenSubDocuments = await this.subDocuments.findMany({
+    //   where: {
+    //     selectionId,
+    //     content: {
+    //       equals: null,
+    //     },
+    //     isGenerating: {
+    //       not: true,
+    //     },
+    //   },
+    // });
+    // const nextPart = notGenSubDocuments.map(subDocument => ({
+    //   part: subDocument.part,
+    //   url: `/chatgpt/generate-document/${selectionId}/part/${subDocument.part}`,
+    // }));
+
+    await this.chatgptKey.update({
+      where: {
+        id: chatgptKey.id,
+      },
+      data: {
+        isRunning: false,
+      },
+    });
+
+    return {
+      content: message.content,
+      // nextPart: nextPart,
+    };
+  };
 
   public generateDocument = async (selectionId: number) => {
     const findSelection = await this.selections.findUnique({
@@ -361,13 +392,14 @@ class ChatGPTService {
     if (countKeyIsFree < 1) throw new HttpException(400, "Please try again after a minutes. All keys are running");
 
     // generatePartsInDocument(findSelection);
-    generateFullyDocument(findSelection);
+    // generateFullyDocument(findSelection);
 
     // return outline
-    const outline = createOutline(findSelection);
+    const data = createOutline(findSelection);
 
     return {
-      outline,
+      ...data,
+      selection: findSelection,
     };
   };
 

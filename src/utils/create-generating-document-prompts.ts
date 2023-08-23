@@ -14,12 +14,17 @@ export const OUTLINE_OF_DOCUMENT = [
 export function createOutline(selection: Selection) {
   const tableOfContent = OUTLINE_OF_DOCUMENT.map((title, id) => `${id + 1}. ${title}:`).join("\n");
 
-  return `
+  const content = `
 Software Requirement Specification for ${selection.projectName}
 
 Table of Contents
 ${tableOfContent}
   `;
+
+  return {
+    content,
+    outline: OUTLINE_OF_DOCUMENT,
+  };
 }
 
 export function createOutlinePrompt(softwareName: string, description: string, features: string[]) {

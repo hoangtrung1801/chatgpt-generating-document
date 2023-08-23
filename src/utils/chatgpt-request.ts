@@ -1,25 +1,8 @@
-import { CHATGPT_API } from "@/config";
-import axios from "axios";
-import openai from "./openai";
 import { ChatCompletionRequestMessage, Configuration, OpenAIApi } from "openai";
-import { PrismaClient } from "@prisma/client";
+import openai from "./openai";
 
 export const chatGPTRequest = async (messages: ChatCompletionRequestMessage[]) => {
   try {
-    // const response = await axios.post(
-    //   chatGPTUrl,
-    //   {
-    //     model: "gpt-3.5-turbo",
-    //     messages,
-    //   },
-    //   {
-    //     headers: {
-    //       Authorization: CHATGPT_API,
-    //       "Content-Type": "application/json",
-    //     },
-    //   },
-    // );
-
     const response = await openai.createChatCompletion({
       model: "gpt-3.5-turbo-0301",
       messages: [...messages],
@@ -44,7 +27,7 @@ export const chatGPTRequestWithKey = async (key: string, messages: ChatCompletio
     const response = await openai.createChatCompletion({
       model: "gpt-3.5-turbo-0301",
       messages: [...messages],
-      temperature: 0.2,
+      temperature: 1,
       // max_tokens: 2048,
     });
 
