@@ -41,6 +41,8 @@
     "morgan": "^1.10.0",
     "openai": "^3.2.1",
     "ra-input-rich-text": "^4.8.2",
+    "socket.io": "^4.7.2",
+    "socket.io-stream": "^0.9.1",
     "swagger-jsdoc": "^6.2.1",
     "swagger-ui-express": "^4.5.0",
     "winston": "^3.8.1",

@@ -11,11 +11,14 @@ import hpp from "hpp";
 import morgan from "morgan";
 import swaggerJSDoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
+import { Server as SocketServer } from "socket.io";
+import handleSocket from "./socket";
 
 class App {
   public app: express.Application;
   public env: string;
   public port: string | number;
+  public io: SocketServer;
 
   constructor(routes: Routes[]) {
     this.app = express();
@@ -36,6 +39,13 @@ class App {
       logger.info(`=================================`);
     });
     server.setTimeout(1000 * 60 * 5);
+
+    this.io = new SocketServer(server, {
+      cors: {
+        origin: "*",
+      },
+    });
+    this.io.on("connection", handleSocket);
   }
 
   public getServer() {
