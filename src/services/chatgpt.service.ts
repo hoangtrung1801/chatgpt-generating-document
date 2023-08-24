@@ -492,7 +492,11 @@ ${detailSections.join("\n\n")}
       where: {
         isRunning: false,
       },
+      orderBy: {
+        lastUsedAt: "asc",
+      },
     });
+    console.log({ keys });
     if (keys.length < 1) throw new Error("Please try again after a minutes. All keys are running");
 
     const chatgptKey = keys[0];
@@ -552,6 +556,7 @@ ${detailSections.join("\n\n")}
       },
       data: {
         isRunning: false,
+        lastUsedAt: new Date(),
       },
     });
 
