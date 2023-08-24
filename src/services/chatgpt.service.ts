@@ -3,11 +3,11 @@ import chatGPTRequest, { chatGPTRequestBriefPrompt, chatGPTRequestTodoListPrompt
 import convertMarkdownToHTML from "@/utils/convertMarkdownToHTML";
 import { createOutline, createOutlinePrompt } from "@/utils/create-generating-document-prompts";
 import { generateBriefPrompt } from "@/utils/generate-chatgpt-prompt";
-import { generateFullyDocument } from "@/utils/generate-document";
 import generateUserFlowPrompt from "@/utils/generate-user-flow-prompt";
 import { PrismaClient } from "@prisma/client";
 import { isEmpty } from "class-validator";
-import { ChatCompletionRequestMessage, ChatCompletionResponseMessage } from "openai";
+import { OpenAI } from "openai";
+import { Stream } from "openai/streaming";
 
 class ChatGPTService {
   public chatgptBrief = new PrismaClient().chatGPTBriefAnswer;
@@ -143,7 +143,7 @@ class ChatGPTService {
       findSelection.app.questions.map(question => question.name),
     );
 
-    const body: ChatCompletionRequestMessage[] = [
+    const body: OpenAI.Chat.Completions.CreateChatCompletionRequestMessage[] = [
       {
         role: "system",
         content: "You are expert in making software requirement",
@@ -155,7 +155,7 @@ class ChatGPTService {
     });
 
     const response = await chatGPTRequest(body);
-    const message: ChatCompletionResponseMessage = response.data.choices[0].message;
+    const message: OpenAI.Chat.ChatCompletionMessage = response.data.choices[0].message;
     const mermaid = message.content;
 
     let finalMermaid = mermaid.match(/```mermaid(\s+([\s\S]+?))```/gi)[0];
@@ -292,7 +292,7 @@ class ChatGPTService {
     // });
 
     // request generating part of document
-    const body: ChatCompletionRequestMessage[] = [
+    const body: OpenAI.Chat.Completions.CreateChatCompletionRequestMessage[] = [
       {
         role: "system",
         content: "You are expert in making software requirement",
@@ -403,7 +403,7 @@ class ChatGPTService {
     };
   };
 
-  public generateDocumentInBackground = async (selectionId: number, body: ChatCompletionRequestMessage[]) => {
+  public generateDocumentInBackground = async (selectionId: number, body: OpenAI.Chat.Completions.CreateChatCompletionRequestMessage[]) => {
     const sections = [
       "Introduction",
       "Project Overview",
@@ -470,6 +470,94 @@ ${detailSections.join("\n\n")}
 
   private createSubDocument = async (selectionId: number, outline: string) => {
     // await this.subDocuments.create({});
+  };
+
+  public streamGeneratePartOfDocument = async (socket, selectionId: number, partIndex: number) => {
+    const findSelection = await this.selections.findUnique({
+      where: {
+        id: selectionId,
+      },
+      include: {
+        chatGPTBriefAnswer: true,
+        app: {
+          include: {
+            questions: true,
+          },
+        },
+      },
+    });
+    if (!findSelection) throw new Error("Selection not found");
+
+    const keys = await this.chatgptKey.findMany({
+      where: {
+        isRunning: false,
+      },
+    });
+    if (keys.length < 1) throw new Error("Please try again after a minutes. All keys are running");
+
+    const chatgptKey = keys[0];
+    await this.chatgptKey.update({
+      where: {
+        id: chatgptKey.id,
+      },
+      data: {
+        isRunning: true,
+      },
+    });
+
+    // const subDocument = await this.subDocuments.findFirst({
+    //   where: {
+    //     selectionId,
+    //     part: partId,
+    //   },
+    // });
+    // if (!subDocument) throw new HttpException(404, "Sub document not found");
+    // if (subDocument.isGenerating) throw new HttpException(400, "Sub document is generating");
+
+    // update is_generating status
+    // await this.subDocuments.update({
+    //   where: { id: subDocument.id },
+    //   data: { isGenerating: true },
+    // });
+
+    // request generating part of document
+    const body: OpenAI.Chat.Completions.CreateChatCompletionRequestMessage[] = [
+      {
+        role: "system",
+        content: "You are expert in making software requirement",
+      },
+      {
+        role: "user",
+        content: createOutlinePrompt(findSelection.projectName, findSelection.description, [
+          "User profile creation and management",
+          "News feed displaying content from friends and followed pages",
+          "Friend requests and messaging",
+          "Group creation and management",
+          "Pages creation and management",
+          "Like, comment, and share functionalities for posts and pages",
+          "Notifications for activity on the website",
+        ]),
+      },
+      {
+        role: "user",
+        content: `Rewrite part ${partIndex}. It should be written in a clear and concise style, made longer, and more specific, detail. The final must be minimum 1 pages in length and in markdown format.`,
+      },
+    ];
+
+    const response = await chatGPTRequestWithKey(chatgptKey.key, body, true);
+
+    await this.chatgptKey.update({
+      where: {
+        id: chatgptKey.id,
+      },
+      data: {
+        isRunning: false,
+      },
+    });
+
+    return {
+      stream: response,
+    };
   };
 }
 

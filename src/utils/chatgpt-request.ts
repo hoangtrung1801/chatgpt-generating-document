@@ -1,11 +1,11 @@
-import { ChatCompletionRequestMessage, Configuration, OpenAIApi } from "openai";
+import { OpenAI } from "openai";
 import openai from "./openai";
 
-export const chatGPTRequest = async (messages: ChatCompletionRequestMessage[]) => {
+export const chatGPTRequest = async (messages: OpenAI.Chat.Completions.CreateChatCompletionRequestMessage[]) => {
   try {
-    const response = await openai.createChatCompletion({
+    const response = await openai.chat.completions.create({
       model: "gpt-3.5-turbo-0301",
-      messages: [...messages],
+      messages,
       temperature: 0.2,
       // max_tokens: 2048,
     });
@@ -16,23 +16,23 @@ export const chatGPTRequest = async (messages: ChatCompletionRequestMessage[]) =
   }
 };
 
-export const chatGPTRequestWithKey = async (key: string, messages: ChatCompletionRequestMessage[]) => {
+export const chatGPTRequestWithKey = async (key: string, messages: OpenAI.Chat.Completions.CreateChatCompletionRequestMessage[], stream = false) => {
   try {
-    const config = new Configuration({
+    const openai = new OpenAI({
       apiKey: key,
     });
 
-    const openai = new OpenAIApi(config);
-
-    const response = await openai.createChatCompletion({
+    const response = await openai.chat.completions.create({
       model: "gpt-3.5-turbo-0301",
       messages: [...messages],
       temperature: 1,
       // max_tokens: 2048,
+      stream,
     });
 
     return response;
   } catch (error) {
+    console.error(error);
     return error;
   }
 };
