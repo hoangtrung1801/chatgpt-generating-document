@@ -23,7 +23,7 @@ export const chatGPTRequestWithKey = async (key: string, messages: OpenAI.Chat.C
     });
 
     const response = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo-0301",
+      model: "gpt-3.5-turbo-0613",
       messages: [...messages],
       temperature: 1,
       // max_tokens: 2048,
