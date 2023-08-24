@@ -11,8 +11,9 @@ class EpicsController {
   public getAllEpics = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const findAllEpicsData = await this.epicsService.getAllEpics();
+      const count = await this.epicsService.countEpics();
 
-      res.status(200).json({ data: findAllEpicsData, message: "findAll" });
+      res.status(200).json({ data: findAllEpicsData, count, message: "findAll" });
     } catch (error) {
       next(error);
     }

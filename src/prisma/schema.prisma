@@ -11,11 +11,11 @@ generator client {
 }
 
 model User {
-  id         Int      @id @default(autoincrement())
-  name       String
-  email      String   @unique
-  password   String
-  created_at DateTime @default(now())
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now()) @map("created_at")
 
   selections Selection[]
 
@@ -24,31 +24,44 @@ model User {
   @@map("user")
 }
 
-model Category {
-  id           Int     @id @default(autoincrement())
-  name         String  @map("category_name")
-  thumbnail    String  @map("category_thumbnail")
-  primaryColor String  @map("primary_color")
-  status       Boolean @db.Bit(1)
+model App {
+  id        Int       @id @default(autoincrement())
+  name      String
+  thumbnail String?   @db.VarChar(512)
+  // primaryColor String? @map("primary_color")
+  status    AppStatus @default(COMING_SOON)
+
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  categoryId Int      @map("category_id")
 
   questions Question[]
 
   selections Selection[]
 
+  @@map("ai_app")
+}
+
+model Category {
+  id        Int            @id @default(autoincrement())
+  name      String
+  thumbnail String?        @db.VarChar(512)
+  status    CategoryStatus @default(COMING_SOON)
+
+  apps App[]
+
   @@map("ai_category")
 }
 
 model Question {
-  id          Int     @id @default(autoincrement())
-  name        String  @map("question_name")
-  description String  @map("question_description") @db.Text
-  questionGPT String  @map("question_gpt") @db.Text
-  keyword     String  @default("") @map("question_keyword")
-  status      Boolean @default(true) @db.Bit(1)
-  type        String  @default("")
+  id          Int          @id @default(autoincrement())
+  name        String       @map("question_name")
+  description String?      @map("question_description") @db.Text
+  questionGPT String?      @map("question_gpt") @db.Text
+  keyword     String?      @map("question_keyword")
+  type        QuestionType
 
-  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  categoryId Int      @map("category_id")
+  app   App @relation(fields: [appId], references: [id], onDelete: Cascade)
+  appId Int @map("app_id")
 
   options Option[]
 
@@ -84,15 +97,18 @@ model SelectedOption {
 }
 
 model Selection {
-  id          Int    @id @default(autoincrement())
-  title       String
-  description String @db.Text
+  id          Int      @id @default(autoincrement())
+  username    String   @db.VarChar(512)
+  projectName String   @map("project_name")
+  description String?  @db.Text
   createdAt   DateTime @default(now()) @map("created_at")
+  guestId     String?  @unique @map("guest_id") @db.VarChar(64)
+  document    String?  @db.Text
 
   selectedOptions SelectedOption[]
 
-  category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  categoryId Int?      @default(3) @map("category_id")
+  app   App? @relation(fields: [appId], references: [id], onDelete: SetNull)
+  appId Int? @default(3) @map("app_id")
 
   user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId Int  @default(1) @map("user_id")
@@ -101,8 +117,14 @@ model Selection {
 
   chatGPTBriefAnswer ChatGPTBriefAnswer?
 
-  sprint             Sprint[]
-  epic               Epic[]
+  sprint Sprint[]
+
+  epic Epic[]
+
+  // userFlow Json? @default("{}") @map("user_flow")
+  userFlow String? @map("user_flow") @db.Text
+
+  subDocuments SubDocument[]
 
   @@map("ai_selection")
 }
@@ -183,6 +205,29 @@ model Epic {
   @@map("ai_epic")
 }
 
+model ChatGPTKey {
+  id         Int       @id @default(autoincrement())
+  key        String    @db.VarChar(128)
+  isRunning  Boolean   @default(false) @map("is_running")
+  lastUsedAt DateTime? @map("last_used_at")
+
+  @@map("chatgpt_key_usage")
+}
+
+model SubDocument {
+  id      Int    @id @default(autoincrement())
+  part    String @db.VarChar(16)
+  title   String @db.Text
+  content String? @db.Text
+  isGenerating Boolean @default(false) @map("is_generating")
+
+  selection   Selection @relation(fields: [selectionId], references: [id], onDelete: Cascade)
+  selectionId Int       @map("selection_id")
+
+  @@map("ai_sub_document")
+  @@unique([selectionId, part])
+}
+
 enum UserStoryStatus {
   IN
   IN_PROGRESS
@@ -199,4 +244,26 @@ enum EpicStatus {
   ARCHIVED
 
   @@map("epic_status")
+}
+
+enum CategoryStatus {
+  COMING_SOON
+  LAUNCH
+
+  @@map("category_status")
+}
+
+enum AppStatus {
+  COMING_SOON
+  LAUNCH
+
+  @@map("app_status")
+}
+
+enum QuestionType {
+  SINGLE
+  MULTI
+  YESNO
+
+  @@map("question_type")
 }

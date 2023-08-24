@@ -7,6 +7,10 @@ import { isEmpty } from "@utils/util";
 class UserService {
   public users = new PrismaClient().user;
 
+  public async countUsers() {
+    return await this.users.count();
+  }
+
   public async findAllUser(): Promise<User[]> {
     const allUser: User[] = await this.users.findMany();
     return allUser;

@@ -1,16 +1,19 @@
 import { HttpException } from "@/exceptions/HttpException";
+import CategoriesService from "@/services/categories.service";
 import { isEmpty } from "@/utils/util";
 import { Category, PrismaClient } from "@prisma/client";
 import { NextFunction, Request, Response } from "express";
 
 class CategoriesController {
   public categories = new PrismaClient().category;
+  public categoriesService = new CategoriesService();
 
   public getCategories = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const findAllCategoriesData: Category[] = await this.categories.findMany();
+      const findAllsData: Category[] = await this.categories.findMany();
+      const count = await this.categoriesService.countCategories();
 
-      res.status(200).json({ data: findAllCategoriesData, message: "findAll" });
+      res.status(200).json({ data: findAllsData, count, message: "Found all categories" });
     } catch (error) {
       next(error);
     }
@@ -19,16 +22,16 @@ class CategoriesController {
   public getCategoryById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const categoryId = Number(req.params.id);
-      if (isEmpty(categoryId)) throw new HttpException(400, "CategoryId is empty");
+      if (isEmpty(categoryId)) throw new HttpException(400, "categoryId is empty");
 
       const findCategoryData: Category = await this.categories.findUnique({
         where: { id: categoryId },
         include: {
-          questions: true,
+          apps: true,
         },
       });
 
-      res.status(200).json({ data: findCategoryData, message: "findOne" });
+      res.status(200).json({ data: findCategoryData, message: "found category by id" });
     } catch (error) {
       next(error);
     }
@@ -36,9 +39,6 @@ class CategoriesController {
 
   public createCategory = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      // const userData: CreateUserDto = req.body;
-      // const createUserData: User = await this.categoriesService.createUser(userData);
-
       const categoryData = req.body;
       const createCategoryData: Category = await this.categories.create({
         data: categoryData,
@@ -54,7 +54,6 @@ class CategoriesController {
     try {
       const categoryId = Number(req.params.id);
       const categoryData: Partial<Category> = req.body;
-      // const updateUserData: Category = await this.categoriesService.updateUser(categoryId, categoryData);
       const updateCategoryData: Category = await this.categories.update({
         where: {
           id: categoryId,
@@ -75,9 +74,9 @@ class CategoriesController {
       const findCategory = await this.categories.findUnique({ where: { id: categoryId } });
       if (!findCategory) throw new HttpException(409, "Category does not exist");
 
-      const deleteCategoryData: Category = await this.categories.delete({ where: { id: categoryId } });
+      const deleteCategory: Category = await this.categories.delete({ where: { id: categoryId } });
 
-      res.status(200).json({ data: deleteCategoryData, message: "deleted" });
+      res.status(200).json({ data: deleteCategory, message: "deleted" });
     } catch (error) {
       next(error);
     }

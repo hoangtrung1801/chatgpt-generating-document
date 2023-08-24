@@ -35,10 +35,10 @@ class ChatGPTController {
     try {
       const user = req.user;
       const findAllBriefAnswers: ChatGPTBriefAnswer[] = await this.chatgptService.getBriefsOfUser(user.id);
-      console.log(user, findAllBriefAnswers);
 
       res.status(200).json({
         data: findAllBriefAnswers,
+        count: await this.chatgptBrief.count(),
         message: "found all",
       });
     } catch (error) {
@@ -78,65 +78,13 @@ class ChatGPTController {
 
   public generateBriefAnswer = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const generateBriefData: GenerateBriefAnswerDto = req.body;
+      const selectionId = Number(req.params.selectionId);
+      if (!selectionId) throw new HttpException(400, "SelectionId does not exist");
 
-      const selectionId = generateBriefData.selectionId;
-      const findSelectionData = await this.selections.findUnique({
-        where: { id: selectionId },
-        include: {
-          selectedOptions: {
-            include: {
-              option: {
-                include: {
-                  question: true,
-                },
-              },
-            },
-          },
-          category: true,
-        },
-      });
-      if (!findSelectionData) throw new HttpException(400, "SelectionId does not exist");
-
-      // get questions
-      const selectedQuestions = {};
-
-      const selectedOptionsData = findSelectionData.selectedOptions;
-      const optionsData = selectedOptionsData.map(obj => obj.option);
-
-      optionsData.forEach(option => {
-        if (!selectedQuestions[option.question.name]) {
-          selectedQuestions[option.question.name] = [option.name];
-        } else {
-          selectedQuestions[option.question.name] = [...selectedQuestions[option.question.name], option.name];
-        }
-      });
-
-      // get category name
-      const categoryData = findSelectionData.category;
-      const categoryName = categoryData.name;
-
-      const briefPrompt = generateBriefPrompt({
-        softwareName: findSelectionData.title,
-        description: findSelectionData.description,
-        features: Object.keys(selectedQuestions),
-      });
-
-      const chatGPTResponse = await chatGPTRequestBriefPrompt(briefPrompt);
-      const answer = chatGPTResponse.choices[0].message.content;
-
-      console.log("chatGPTResponse", answer);
-
-      const chatgptAnswer = await this.chatgptBrief.create({
-        data: {
-          answer,
-          selectionId,
-          prompt: briefPrompt,
-        },
-      });
+      const chatgptBrief = await this.chatgptService.generateBrief(selectionId);
 
       res.status(200).json({
-        data: chatgptAnswer,
+        data: chatgptBrief,
         // data: {},
         message: "generate brief",
       });
@@ -154,8 +102,9 @@ class ChatGPTController {
 
       const userStories = await this.chatgptService.generateUserStoryList(briefId);
 
+      // UPDATE
       const responses = await Promise.all([
-        ...userStories.map(todo => this.userStoryService.addUserStory(todo, brief.selectionId)),
+        // ...userStories.map(todo => this.userStoryService.addUserStory(todo, brief.selectionId)),
         // ...userStories.map(todo => jiraPushUserStory(todo)),
       ]);
 
@@ -170,107 +119,71 @@ class ChatGPTController {
     }
   };
 
-  // public generateQuestionAnswer = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  //   try {
-  //     const briefPrompt = generateBriefPrompt("uber", ["payment", "shipping"]);
+  public generateUserFlow = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const selectionId = Number(req.params.selectionId);
+      if (!selectionId) throw new HttpException(400, "SelectionId does not exist");
 
-  //     const chatGPTResponse = await chatGPTRequestBriefPrompt(briefPrompt);
+      const userFlow = await this.chatgptService.generateUserFlow(selectionId);
 
-  //     const answer = chatGPTResponse.choices[0].message.content;
+      res.status(200).json({
+        data: userFlow,
+        message: "generated user flow",
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
 
-  //     res.status(200).json({
-  //       data: answer,
-  //       message: "generate brief",
-  //     });
-  //   } catch (error) {
-  //     next(error);
-  //   }
-  // };
+  public generateDocument = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const selectionId = Number(req.params.selectionId);
+      const document = await this.chatgptService.generateDocument(selectionId);
 
-  //   public questions = new PrismaClient().question;
-  //   public options = new PrismaClient().option;
-  //   public getQuestions = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  //     try {
-  //       const findAllQuestionsData: Question[] = await this.questions.findMany();
-  //       res.status(200).json({ data: findAllQuestionsData, message: "findAll" });
-  //     } catch (error) {
-  //       next(error);
-  //     }
-  //   };
-  //   public getQuestionById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  //     try {
-  //       const questionId = Number(req.params.id);
-  //       if (isEmpty(questionId)) throw new HttpException(400, "QuestionId is empty");
-  //       const findQuestionData: Question = await this.questions.findUnique({
-  //         where: { id: questionId },
-  //         include: {
-  //           options: true,
-  //         },
-  //       });
-  //       if (!findQuestionData) throw new HttpException(400, "QuestionId does not exist");
-  //       res.status(200).json({ data: findQuestionData, message: "findOne" });
-  //     } catch (error) {
-  //       next(error);
-  //     }
-  //   };
-  //   public createQuestion = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  //     try {
-  //       // const userData: CreateUserDto = req.body;
-  //       // const createUserData: User = await this.categoriesService.createUser(userData);
-  //       // res.status(201).json({ data: createQuestionData, message: "created" });
-  //       const questionData: CreateQuestionDto = req.body;
-  //       const optionsData = questionData.options;
-  //       const createQuestionData: Question = await this.questions.create({
-  //         data: {
-  //           name: questionData.name,
-  //           description: questionData.description,
-  //           questionGPT: questionData.questionGPT,
-  //           categoryId: questionData.categoryId,
-  //           options: {
-  //             createMany: {
-  //               data: optionsData,
-  //             },
-  //           },
-  //         },
-  //         include: {
-  //           options: true,
-  //         },
-  //       });
-  //       res.status(201).json({
-  //         data: createQuestionData,
-  //         message: "created",
-  //       });
-  //     } catch (error) {
-  //       next(error);
-  //     }
-  //   };
-  //   public updateQuestion = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  //     try {
-  //       const questionId = Number(req.params.id);
-  //       const questionData: Partial<Question> = req.body;
-  //       // const updateUserData: Question = await this.categoriesService.updateUser(categoryId, categoryData);
-  //       const updateQuestionData: Question = await this.questions.update({
-  //         where: {
-  //           id: questionId,
-  //         },
-  //         data: questionData,
-  //       });
-  //       res.status(200).json({ data: updateQuestionData, message: "updated" });
-  //     } catch (error) {
-  //       next(error);
-  //     }
-  //   };
-  //   public deleteQuestion = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  //     try {
-  //       const questionId = Number(req.params.id);
-  //       const findQuestion = await this.questions.findUnique({ where: { id: questionId } });
-  //       if (!findQuestion) throw new HttpException(409, "Question does not exist");
-  //       const deleteQuestionData: Question = await this.questions.delete({ where: { id: questionId } });
-  //       res.status(200).json({ data: deleteQuestionData, message: "deleted" });
-  //     } catch (error) {
-  //       next(error);
-  //     }
-  //   };
+      res.status(200).json({
+        data: document,
+        message: "generated document",
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public generatePartOfDocument = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const selectionId = Number(req.params.selectionId);
+      if (!selectionId) throw new HttpException(400, "SelectionId does not exist");
+
+      const partIndex = Number(req.params.partIndex);
+      if (!partIndex) throw new HttpException(400, "PartId does not exist");
+
+      const data = await this.chatgptService.generatePartOfDocument(selectionId, partIndex);
+
+      res.status(200).json({
+        // data,
+        data,
+        message: "generated part of document",
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public getDocument = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const selectionId = Number(req.params.selectionId);
+      if (!selectionId) throw new HttpException(400, "SelectionId does not exist");
+
+      const document = await this.chatgptService.getDocument(selectionId);
+
+      res.status(200).json({
+        data: document,
+        message: "get document",
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
 }
 
 export default ChatGPTController;

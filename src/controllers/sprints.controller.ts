@@ -11,8 +11,9 @@ class SprintsController {
   public getAllSprints = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const findAllSprintsData = await this.sprintsService.getAllSprints();
+      const count = await this.sprintsService.countSprints();
 
-      res.status(200).json({ data: findAllSprintsData, message: "findAll" });
+      res.status(200).json({ data: findAllSprintsData, count, message: "findAll" });
     } catch (error) {
       next(error);
     }

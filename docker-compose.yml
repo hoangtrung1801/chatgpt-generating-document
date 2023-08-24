@@ -1,50 +1,33 @@
-version: '3.7'
-
+version: '3'
 services:
-  proxy:
-    image: nginx:alpine
-    container_name: proxy
-    ports:
-      - '80:80'
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf
-    restart: 'unless-stopped'
-    networks:
-      - backend
-  server:
+  # backend
+  backend:
     build:
       context: ./
-      target: development-build-stage
-      dockerfile: Dockerfile
-    container_name: server
+    container_name: backend
     ports:
-      - '3000:3000'
+      - "3002:3000"
+    env_file: .env.production.local
+# database
+  db:
+    image: mysql:8.0
+    container_name: db
     volumes:
-      - ./:/app
-      - /app/node_modules
-    restart: 'unless-stopped'
-    networks:
-      - backend
-    links:
-      - mysql
-    depends_on:
-      - mysql
-  mysql:
-    image: mysql:5.7
-    container_name: mysql
-    environment:
-      MYSQL_ROOT_USER: root
-      MYSQL_ROOT_PASSWORD: password
-      MYSQL_DATABASE: test
+      - db_data:/var/lib/mysql
+    restart: unless-stopped
+    env_file: .env.db
     ports:
-      - '3306:3306'
-    networks:
-      - backend
-
-networks:
-  backend:
-    driver: bridge
-
+      - "3306:3306"
+  
+  # phpmyadmin
+  phpmyadmin:
+    depends_on:
+      - db
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    restart: unless-stopped
+    ports:
+      - '8080:80'
+    env_file: .env.phpmyadmin
 volumes:
-  data:
-    driver: local
+  db_data:

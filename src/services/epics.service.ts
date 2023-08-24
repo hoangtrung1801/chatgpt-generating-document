@@ -5,6 +5,10 @@ import { PrismaClient } from "@prisma/client";
 class EpicsService {
   public epics = new PrismaClient().epic;
 
+  public async countEpics() {
+    return await this.epics.count();
+  }
+
   public getAllEpics = async () => {
     const allEpics = await this.epics.findMany();
     return allEpics;

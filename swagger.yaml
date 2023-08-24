@@ -1,39 +1,64 @@
+openapi: '3.0.2'
+
+info:
+  title: API Title
+  version: '1.0'
+
 tags:
-- name: users
-  description: users API
+- name: Auth
+  description: BE use cookie to store authorization token, so you should request /login or /signup before you can request others endpoint
+- name: User
+  # description: users API
+- name: Category
+- name: App
+- name: Question
+- name: Selection
+- name: Option
+- name: Selected Option
+- name: Chatgpt
+- name: User Story
+- name: Sprint
+- name: Epic
 
 paths:
 # [GET] users
   /users:
     get:
       tags:
-      - users
+      - User
       summary: Find All Users
       responses:
         200:
-          description: 'OK'
+          description: Return all users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
         500:
           description: 'Server Error'
 
 # [POST] users
     post:
       tags:
-      - users
-      summary: Add User
-      parameters:
-      - name: body
-        in: body
-        description: user Data
+      - User
+      summary: Create User
+      requestBody:
         required: true
-        schema:
-          $ref: '#/definitions/users'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUser'
       responses:
         201:
           description: 'Created'
-        400:
-          description: 'Bad Request'
-        409:
-          description: 'Conflict'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        401:
+          $ref: '#/components/responses/Unauthorized'
         500:
           description: 'Server Error'
 
@@ -41,60 +66,71 @@ paths:
   /users/{id}:
     get:
       tags:
-      - users
+      - User
       summary: Find User By Id
       parameters:
       - name: id
         in: path
         description: User Id
         required: true
-        type: integer
+        schema:
+          type: integer
       responses:
         200:
-          description: 'OK'
-        409:
-          description: 'Conflict'
+          description: Return user with id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        401:
+          $ref: '#/components/responses/Unauthorized'
         500:
           description: 'Server Error'
 
 # [PUT] users/id
     put:
       tags:
-      - users
+      - User
       summary: Update User By Id
       parameters:
       - name: id
         in: path
-        description: user Id
-        required: true
-        type: integer
-      - name: body
-        in: body
-        description: user Data
+        description: User id
         required: true
         schema:
-          $ref: '#/definitions/users'
+          type: integer
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
       responses:
         200:
           description: 'OK'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
         400:
           description: 'Bad Request'
-        409:
-          description: 'Conflict'
+        401:
+          $ref: '#/components/responses/Unauthorized'
         500:
           description: 'Server Error'
 
 # [DELETE] users/id
     delete:
       tags:
-      - users
+      - User
       summary: Delete User By Id
       parameters:
       - name: id
         in: path
         description: user Id
         required: true
-        type: integer
+        schema:
+          type: integer
       responses:
         200:
           description: 'OK'
@@ -103,21 +139,1507 @@ paths:
         500:
           description: 'Server Error'
 
+# ========= Category =========================
+  /categories:
+    get:
+      tags:
+        - Category
+      summary: 'Get all categories'
+      responses:
+        200:
+          description: Return all categories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Category'
+        500:
+          description: 'Server Error'
+    post:
+      tags:
+        - Category
+      summary: 'Create category'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCategory'
+      responses:
+        201:
+          description: Created category
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+        500:
+          description: 'Server Error'
+
+  /categories/{id}:
+    get:
+      tags:
+      - Category
+      summary: Get category by id
+      responses:
+        200:
+          description: Return category
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+        500:
+          description: 'Server Error'
+    put:
+      tags:
+        - Category
+      summary: Update category
+      responses:
+        200:
+          description: Updated category
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+        500:
+          description: 'Server Error'
+    delete:
+      tags:
+        - Category
+      summary: Update category
+      responses:
+        200:
+          description: Deleted category
+        500:
+          description: 'Server Error'
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+
+
+
+# ========= App =========================
+  /apps:
+    get:
+      tags:
+        - App
+      summary: 'Get all apps'
+      responses:
+        200:
+          description: Return all apps
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/App'
+        500:
+          description: 'Server Error'
+    post:
+      tags:
+        - App
+      summary: 'Create app'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateApp'
+      responses:
+        201:
+          description: Created app
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/App'
+        500:
+          description: 'Server Error'
+
+  /apps/{id}:
+    get:
+      tags:
+      - App
+      summary: Get app by id
+      responses:
+        200:
+          description: Return app
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/App'
+        500:
+          description: 'Server Error'
+    put:
+      tags:
+        - App
+      summary: Update app
+      responses:
+        200:
+          description: Updated app
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/App'
+        500:
+          description: 'Server Error'
+    delete:
+      tags:
+        - App
+      summary: Update app
+      responses:
+        200:
+          description: Deleted app
+        500:
+          description: 'Server Error'
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+
+
+# ========= Question ===================
+  /questions:
+    get:
+      tags:
+        - Question
+      summary: 'Get all questions'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Question'
+        500:
+          description: 'Server Error'
+    post:
+      tags:
+        - Question
+      summary: 'Create question'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateQuestion'
+      responses:
+        200:
+          $ref: '#/components/responses/Question'
+        500:
+          description: 'Server Error'
+
+  /questions/{id}:
+    get:
+      tags:
+      - Question
+      summary: Get question by id
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+           $ref: '#/components/responses/Question'
+        500:
+          description: 'Server Error'
+    put:
+      tags:
+        - Question
+      summary: Update question
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+                $ref: '#/components/schemas/CreateQuestion'
+      responses:
+        200:
+          $ref: '#/components/responses/Question'
+        500:
+          description: 'Server Error'
+    delete:
+      tags:
+        - Question
+      summary: Update app
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: 'OK'
+        500:
+          description: 'Server Error'
+
+  /questions/apps/{appId}:
+    get:
+      tags:
+        - Question
+      summary: Get question of app
+      responses:
+        200:
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Question'
+    parameters:
+      - name: appId
+        in: path
+        required: true
+        schema:
+          type: integer
+
+# ========= Selection ===================
+  /selections:
+    get:
+      tags:
+        - Selection
+      summary: 'Get all selections'
+      responses:
+        200:
+          description: 'OK'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Selection'
+        500:
+          description: 'Server Error'
+    post:
+      tags:
+        - Selection
+      summary: 'Create selection'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSelection'
+      responses:
+        200:
+          $ref: '#/components/responses/Selection'
+        500:
+          description: 'Server Error'
+
+  /selections/{id}:
+    get:
+      tags:
+      - Selection
+      summary: Get selection by id
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          $ref: '#/components/responses/Selection'
+        500:
+          description: 'Server Error'
+    put:
+      tags:
+        - Selection
+      summary: Update selection
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+                $ref: '#/components/schemas/CreateSelection'
+      responses:
+        200:
+          $ref: '#/components/responses/Selection'
+        500:
+          description: 'Server Error'
+    delete:
+      tags:
+        - Selection
+      summary: Update app
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: 'OK'
+        500:
+          description: 'Server Error'
+
+  /selections/current-user:
+    get:
+      tags:
+      - Selection
+      summary: Get all selections of current user
+      responses:
+        200:
+          description: 'OK'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Selection'
+        500:
+          description: 'Server Error'
+
+  /selections/{id}/user-stories:
+    get:
+      tags:
+      - Selection
+      summary: Get all user stories of selection with id
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: 'OK'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserStory'
+        500:
+          description: 'Server Error'
+
+  /selections/{selectionId}/user-stories/{userStoryId}:
+    put:
+      tags:
+      - Selection
+      summary: Update user story (with id) of selection (with id)
+      parameters:
+        - name: selectionId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: userStoryId
+          in: path
+          required: true
+          schema:
+            type: integer
+      # requestBody:
+      #   content:
+      #     application/json:
+      #       schema:
+      #         $ref: ''
+      responses:
+        200:
+          $ref: '#/components/responses/UserStory'
+        500:
+          description: 'Server Error'
+
+  /selections/:id/brief:
+    get:
+      tags:
+        - Selection
+      summary: Get brief of selection with id
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+           $ref: '#/components/responses/Brief'
+        500:
+          description: 'Server Error'
+
+  /selections/:id/user-flow:
+    put:
+      tags:
+        - Selection
+      summary: Update user flow of selection
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nodes:
+                  type: array
+                  items:
+                    type: object
+                  example: [
+                      { id: '1', position: { x: 0, y: 0 }, data: { label: '1' } },
+                      { id: '2', position: { x: 0, y: 100 }, data: { label: '2' } },
+                    ]
+                edges:
+                  type: array
+                  items:
+                    type: object
+                  example: [{ id: 'e1-2', source: '1', target: '2' }]
+      responses:
+        200:
+          $ref: '#/components/responses/Selection'
+
+
+
+# ========= Option ===================
+  /options:
+    get:
+      tags:
+        - Option
+      summary: Get all options
+      responses:
+        200:
+          description: 'OK'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Option'
+        500:
+          description: 'Server Error'
+    # post:
+    #   tags:
+    #     - Selection
+    #   summary: 'Create selection'
+    #   requestBody:
+    #     required: true
+    #     content:
+    #       application/json:
+    #         schema:
+    #           $ref: '#/components/schemas/CreateSelection'
+    #   responses:
+    #     200:
+    #       description: 'OK'
+    #     500:
+    #       description: 'Server Error'
+
+  /options/{id}:
+    # get:
+    #   tags:
+    #   - Selection
+    #   summary: Get selection by id
+    #   parameters:
+    #     - name: id
+    #       in: query
+    #       required: true
+    #       schema:
+    #         type: integer
+    #   responses:
+    #     200:
+    #       description: 'OK'
+    #     500:
+    #       description: 'Server Error'
+    put:
+      tags:
+        - Option
+      summary: Update option with id
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOption'
+      responses:
+        200:
+          $ref: '#/components/responses/Option'
+        500:
+          description: 'Server Error'
+    delete:
+      tags:
+        - Option
+      summary: Update option
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: 'OK'
+        500:
+          description: 'Server Error'
+
+# ========= Selected Option ===================
+  /selected-options:
+    get:
+      tags:
+        - Selected Option
+      summary: Get all selected options
+      responses:
+        200:
+          description: 'OK'
+        500:
+          description: 'Server Error'
+
+# ========= Selection ===================
+  /chatgpt/briefs:
+    get:
+      tags:
+        - Chatgpt
+      summary: Get all briefs (brief in this meaning is outline with little detail)
+      responses:
+        200:
+          description: Return all briefs
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Brief'
+        500:
+          description: 'Server Error'
+  /chatgpt/briefs/{id}:
+    get:
+      tags:
+      - Chatgpt
+      summary: Get brief by id
+      responses:
+        200:
+          description: 'OK'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Brief'
+        500:
+          description: 'Server Error'
+    post:
+      tags:
+        - Chatgpt
+      summary: Create brief using chatgpt
+      responses:
+        200:
+          description: 'OK'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Brief'
+        500:
+          description: 'Server Error'
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+
+  /chatgpt/generate-document/{id}:
+    get:
+      tags:
+        - Chatgpt
+      summary: Get generated document of selection
+      responses:
+        200:
+          description: Ok
+    post:
+      tags:
+        - Chatgpt
+      summary: Generate document
+      responses:
+        200:
+          description: Ok
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+
+
+    # put:
+    #   tags:
+    #     - Selection
+    #   summary: Update selection
+    #   parameters:
+    #     - name: id
+    #       in: query
+    #       required: true
+    #       schema:
+    #         type: integer
+    #   requestBody:
+    #     content:
+    #       application/json:
+    #         schema:
+    #           anyOf:
+    #             - $ref: '#/components/schemas/CreateSelection'
+    #   responses:
+    #     200:
+    #       description: 'OK'
+    #     500:
+    #       description: 'Server Error'
+    # delete:
+    #   tags:
+    #     - Selection
+    #   summary: Update app
+    #   parameters:
+    #     - name: id
+    #       in: query
+    #       required: true
+    #       schema:
+    #         type: integer
+    #   responses:
+    #     200:
+    #       description: 'OK'
+    #     500:
+    #       description: 'Server Error'
+
+  /chatgpt/briefs/:id/user-stories:
+    post:
+      tags:
+        - Chatgpt
+      summary: Create user stories for selection using chatgpt
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBrief'
+      responses:
+        200:
+          description: Return all user stories which are generated from chatgpt
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserStory'
+        500:
+          description: 'Server Error'
+
+
+# ========= Auth ===================
+  /login:
+    post:
+      tags:
+        - Auth
+      summary: Login
+      # description: login
+      # operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Login'
+            example:
+              email: admin0@gmail.com
+              password: '123456'
+      responses:
+        200:
+          description: 'OK'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        500:
+          description: 'Server Error'
+
+  /signup:
+    post:
+      tags:
+        - Auth
+      summary: Sign-up
+      # description: Sign-up
+      # operationId: Sign-up
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignUp'
+            example:
+              email: admin2@gmail.com
+              name: admin2
+              password: '123456'
+      responses:
+        200:
+          description: Return user data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        500:
+          description: 'Server Error'
+
+  /logout:
+    post:
+      tags:
+        - Auth
+      summary: Log out
+      # description: Log out
+      # operationId: Log out
+      responses:
+        200:
+          description: 'OK'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        500:
+          description: 'Server Error'
+
+  /auth:
+    get:
+      tags:
+        - Auth
+      summary: Get current user
+      # description: auth
+      # operationId: auth
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: 'OK'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        500:
+          description: 'Server Error'
+
+# ========= User stories ===================
+  /user-stories:
+    get:
+      tags:
+        - User Story
+      summary: Get all user stories
+      # description: Get all user stories
+      # operationId: getAll5
+      responses:
+        200:
+          description: 'OK'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserStory'
+        500:
+          description: 'Server Error'
+    post:
+      tags:
+        - User Story
+      summary: Create user story
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserStory'
+      responses:
+        200:
+          $ref: '#/components/responses/UserStory'
+        500:
+          description: 'Server Error'
+
+  /user-stories/{id}:
+    get:
+      tags:
+        - User Story
+      summary: Get user story by id
+      # description: Get user story by id
+      # operationId: getById
+      responses:
+        200:
+          $ref: '#/components/responses/UserStory'
+        500:
+          description: 'Server Error'
+    put:
+      tags:
+        - User Story
+      summary: Update user story
+      # description: Update user story
+      # operationId: update5
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserStory'
+      responses:
+        200:
+          $ref: '#/components/responses/UserStory'
+        500:
+          description: 'Server Error'
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+
+# ========= Sprints ===================
+  /sprints:
+    get:
+      tags:
+        - Sprint
+      summary: Get all sprints
+      # description: Get all sprints
+      # operationId: getAll6
+      responses:
+        200:
+          description: return all sprints
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Sprint'
+        500:
+          description: 'Server Error'
+    post:
+      tags:
+        - Sprint
+      summary: Create sprint
+      # description: create
+      # operationId: create4
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSprint'
+            example:
+              endDate: '2023-07-12'
+              name: sprint 1
+              selectionId: 74
+              startDate: '2023-07-07'
+      responses:
+        200:
+          $ref: '#/components/responses/Sprint'
+        500:
+          description: 'Server Error'
+
+  /sprints/{id}:
+    get:
+      tags:
+        - Sprint
+      summary: Get sprint by id
+      description: Get sprint by id
+      # operationId: getById1
+      responses:
+        200:
+          $ref: '#/components/responses/Sprint'
+        500:
+          description: 'Server Error'
+    put:
+      tags:
+        - Sprint
+      summary: Update sprint
+      description: Update sprint
+      # operationId: update7
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSprint'
+            example:
+              name: sprint 1 change
+      responses:
+        200:
+          $ref: '#/components/responses/Sprint'
+        500:
+          description: 'Server Error'
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+
+  /sprints/{id}/user-stories:
+    get:
+      tags:
+        - Sprint
+      summary: Get user stories in sprint
+      description: Get user stories in sprint
+      # operationId: getUserStoriesInSprint1
+      responses:
+        200:
+          description: 'OK'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserStory'
+        500:
+          description: 'Server Error'
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+
+# ========= Epic ===================
+  /epics:
+    get:
+      tags:
+        - Epic
+      summary: Get all epics
+      # description: Get all sprints
+      # operationId: getAll6
+      responses:
+        200:
+          description: Return all epics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Epic'
+        500:
+          description: 'Server Error'
+    post:
+      tags:
+        - Epic
+      summary: Create epic
+      # description: Create epic
+      # operationId: create4
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEpic'
+            example:
+              endDate: '2023-07-12'
+              name: sprint 1
+              selectionId: 74
+              startDate: '2023-07-07'
+      responses:
+        200:
+          description: 'OK'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Epic'
+        500:
+          description: 'Server Error'
+
+  /epics/{id}:
+    get:
+      tags:
+        - Epic
+      summary: Get epic by id
+      description: Get epic by id
+      # operationId: getById1
+      responses:
+        200:
+          $ref: '#/components/responses/Epic'
+        500:
+          description: 'Server Error'
+    put:
+      tags:
+        - Epic
+      summary: Update epic
+      description: Update epic
+      # operationId: update7
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEpic'
+      responses:
+        200:
+          $ref: '#/components/responses/Epic'
+        500:
+          description: 'Server Error'
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+
+  /epics/{id}/user-stories:
+    get:
+      tags:
+        - Epic
+      summary: Get user stories in epic
+      description: Get user stories in epic
+      # operationId: getUserStoriesInSprint1
+      responses:
+        200:
+          description: 'OK'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserStory'
+        500:
+          description: 'Server Error'
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+
 # definitions
-definitions:
-  users:
-    type: object
-    required:
+components:
+  responses:
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Epic:
+      description: Return epic
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Epic'
+    Option:
+      description: Return option
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Option'
+    Brief:
+      description: Return brief
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Brief'
+    Question:
+      description: Return question
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Question'
+    Selection:
+      description: Return selection
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Selection'
+    UserStory:
+      description: Return user story
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserStory'
+    Sprint:
+      description: Return sprint
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Sprint'
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+      required:
+        - message
+
+    CreateUser:
+      type: object
+      required:
+        - name
         - email
         - password
-    properties:
-      email:
-        type: string
-        description: user Email
-      password:
-        type: string
-        description: user Password
+      properties:
+        name:
+          type: string
+          description: User's name
+        email:
+          type: string
+          description: User's email
+        password:
+          type: string
+          description: User's password
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+          description: User's name
+        email:
+          type: string
+          description: user Email
+        createdAt:
+          type: string
+        selections:
+          description: All selection which user created
+          type: array
+          items:
+            $ref: '#/components/schemas/Selection'
 
-schemes:
- - https
- - http
+    CreateCategory:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+        thumbnail:
+          type: string
+        status:
+          $ref: '#/components/schemas/CategoryStatus'
+    Category:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/CreateCategory'
+      properties:
+        id:
+          type: integer
+        apps:
+          description: All apps in this category
+          type: array
+          items:
+            $ref: '#/components/schemas/App'
+    CategoryStatus:
+      type: string
+      enum: [COMING_SOON, LAUNCH]
+
+
+    App:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        thumbnail:
+          type: string
+        primaryColor:
+          type: string
+        status:
+          type: boolean
+        questions:
+          description: All question in this app
+          type: array
+          items:
+            $ref: '#/components/schemas/Question'
+    CreateApp:
+      type: object
+      required:
+        - name
+        - thumbnail
+        - status
+      properties:
+        name:
+          type: string
+        thumbnail:
+          type: string
+        status:
+          $ref: '#/components/schemas/App'
+    AppStatus:
+      type: string
+      enum: [COMING_SOON, LAUNCH]
+
+    CreateQuestion:
+      type: object
+      required:
+        - name
+        - description
+        - questionGPT
+        - appId
+        - options
+        - type
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        questionGPT:
+          type: string
+        keyword:
+          type: string
+        status:
+          type: boolean
+        type:
+          type: string
+        appId:
+          type: integer
+        options:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreateOption'
+    Question:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/CreateQuestion'
+      properties:
+        id:
+          type: integer
+
+    Option:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        type:
+          type: string
+        questionId:
+          type: integer
+    CreateOption:
+      type: object
+      required:
+        - name
+        - description
+        - type
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        type:
+          type: string
+
+    CreateSelection:
+      type: object
+      required:
+      - appId
+      - selectedOptions
+      - projectName
+      - username
+      properties:
+        appId:
+          type: integer
+        username:
+          type: integer
+        selectedOptions:
+          type: array
+          items:
+            type: integer
+        projectName:
+          type: string
+        description:
+          type: string
+        guestId:
+          type: string
+          description: UUID for non-register feature
+    Selection:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/Selection'
+      properties:
+        id:
+          type: integer
+        selectedOptions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Selection'
+        userId:
+          type: integer
+          description: User ID is belong to user created this selection
+        createdAt:
+          type: string
+        sprint:
+          type: array
+          items:
+            $ref: '#/components/schemas/Sprint'
+          description: All sprints in selection
+        epic:
+          type: array
+          items:
+            $ref: '#/components/schemas/Epic'
+          description: All spics in selection
+        userFlow:
+          type: string
+          description: Data in mermaid.js format
+          # type: object
+          # properties:
+          #   nodes:
+          #     type: array
+          #     items:
+          #       type: object
+          #     example: [
+          #         { id: '1', position: { x: 0, y: 0 }, data: { label: '1' } },
+          #       ]
+          #   edges:
+          #     type: array
+          #     items:
+          #       type: object
+          #     example: [{ id: 'e1-2', source: '1', target: '2' }]
+
+    CreateBrief:
+      type: object
+      required:
+        - selectionId
+      properties:
+        selectionId:
+          type: integer
+    Brief:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/Brief'
+      properties:
+        id:
+          type: integer
+        answer:
+          type: string
+        prompt:
+          type: string
+
+
+    Login:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          example: test@gmail.com
+        password:
+          type: string
+          example: '123test'
+    SignUp:
+      type: object
+      required:
+        - email
+        - name
+        - password
+      properties:
+        email:
+          type: string
+          example: test@gmail.com
+        name:
+          type: string
+          example: Name Test
+        password:
+          type: string
+          example: '123test'
+        guestId:
+          type: string
+          description: UUID for non-register feature
+
+    CreateUserStory:
+      type: object
+      required:
+        - title
+        - description
+        - storyPoint
+        - status
+        - selectionId
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        storyPoint:
+          type: string
+        status:
+          $ref: '#/components/schemas/UserStoryStatus'
+        selectionId:
+          type: integer
+        sprintId:
+          type: integer
+        epicId:
+          type: integer
+        assigneeId:
+          type: integer
+    UserStory:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/CreateUserStory'
+      properties:
+        id:
+          type: integer
+        createdAt:
+          type: string
+    UserStoryStatus:
+      type: string
+      enum: [IN, IN_PROGRESS, IN_REVIEW, DONE]
+
+    CreateSprint:
+      type: object
+      properties:
+        name:
+          type: string
+          example: sprint 1
+        endDate:
+          type: string
+          example: '2023-07-12'
+        startDate:
+          type: string
+          example: '2023-07-07'
+        selectionId:
+          type: number
+          example: 74
+    Sprint:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/CreateSprint'
+      properties:
+        id:
+          type: integer
+        userStories:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserStory'
+
+
+    CreateEpic:
+      type: object
+      properties:
+        title:
+          type: string
+          example: epic 1
+        description:
+          type: string
+        selectionId:
+          type: integer
+    Epic:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/CreateEpic'
+      properties:
+        createdAt:
+          type: string
+        userStories:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserStory'

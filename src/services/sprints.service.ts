@@ -4,6 +4,10 @@ import { PrismaClient } from "@prisma/client";
 class SprintsService {
   public sprints = new PrismaClient().sprint;
 
+  public async countSprints() {
+    return await this.sprints.count();
+  }
+
   public getAllSprints = async () => {
     const allSprints = await this.sprints.findMany();
     return allSprints;

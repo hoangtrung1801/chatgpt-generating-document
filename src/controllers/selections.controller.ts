@@ -1,7 +1,8 @@
-import { CreateSelectionDto } from "@/dtos/selections.dto";
+import { CreateSelectionDto, SelectionDto, UserFlowDto } from "@/dtos/selections.dto";
 import { CreateUserStoryDto } from "@/dtos/user-story.dto";
 import { HttpException } from "@/exceptions/HttpException";
 import { RequestWithUser } from "@/interfaces/auth.interface";
+import ChatGPTService from "@/services/chatgpt.service";
 import SelectionService from "@/services/selections.service";
 import UserStoryService from "@/services/user-stories.service";
 import { isEmpty } from "@/utils/util";
@@ -14,12 +15,14 @@ class SelectionsController {
 
   public selectionService = new SelectionService();
   public userStoryService = new UserStoryService();
+  public chatgptService = new ChatGPTService();
 
   public getSelections = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const findAllSelectionsData: Selection[] = await this.selections.findMany();
+      const count = await this.selectionService.countSelections();
 
-      res.status(200).json({ data: findAllSelectionsData, message: "findAll" });
+      res.status(200).json({ data: findAllSelectionsData, count, message: "findAll" });
     } catch (error) {
       next(error);
     }
@@ -55,7 +58,7 @@ class SelectionsController {
       const user = req.user;
       const findCurrentUserSelections = await this.selectionService.findCurrentUserSelections(user.id);
 
-      res.status(201).json({
+      res.status(200).json({
         data: findCurrentUserSelections,
         message: "get current user's selections",
       });
@@ -78,8 +81,17 @@ class SelectionsController {
 
   public createSelection = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
     try {
+      req.setTimeout(1000 * 60 * 5);
+      res.setTimeout(1000 * 60 * 5);
+
       const user = req.user;
+
       const createSelectionData = await this.selectionService.createSelection(req.body, user.id);
+
+      // await this.chatgptService.generateBrief(createSelectionData.id);
+      // const userFlow = await this.chatgptService.generateUserFlow(createSelectionData.id);
+
+      // createSelectionData.userFlow = userFlow;
 
       res.status(201).json({
         data: createSelectionData,
@@ -96,7 +108,7 @@ class SelectionsController {
       const findSelectionData = await this.selections.findUnique({ where: { id: selectionId } });
       if (!findSelectionData) throw new HttpException(400, "Selection does not exist");
 
-      const selectionData: Partial<CreateSelectionDto> = req.body;
+      const selectionData: Partial<SelectionDto> = req.body;
 
       const updateSelectionData = await this.selections.update({
         where: {
@@ -162,6 +174,19 @@ class SelectionsController {
       const updateUserStory = await this.userStoryService.updateUserStory(userStoryId, req.body);
 
       res.status(200).json({ data: updateUserStory, message: "update user stories in selection" });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public updateUserFlow = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const selectionId = Number(req.params.id);
+
+      const userFlow = req.body as UserFlowDto;
+      const selection = await this.selectionService.updateUserFlow(selectionId, userFlow);
+
+      res.status(200).json({ data: selection, message: "Updated user flow" });
     } catch (error) {
       next(error);
     }
