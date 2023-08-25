@@ -137,6 +137,27 @@ class ChatGPTService {
     });
     if (!findSelection) throw new HttpException(404, "Selection not found");
 
+    const keys = await this.chatgptKey.findMany({
+      where: {
+        isRunning: false,
+      },
+      orderBy: {
+        lastUsedAt: "asc",
+      },
+    });
+
+    if (keys.length < 1) throw new Error("Please try again after a minutes. All keys are running");
+
+    const chatgptKey = keys[0];
+    await this.chatgptKey.update({
+      where: {
+        id: chatgptKey.id,
+      },
+      data: {
+        isRunning: true,
+      },
+    });
+
     const userFlowPrompt = generateUserFlowPrompt(
       findSelection.projectName,
       findSelection.description,
@@ -154,7 +175,7 @@ class ChatGPTService {
       content: userFlowPrompt,
     });
 
-    const response = await chatGPTRequest(body);
+    const response = await chatGPTRequestWithKey(chatgptKey.key, body);
     const message: OpenAI.Chat.ChatCompletionMessage = response.choices[0].message;
     const mermaid = message.content;
 
@@ -191,6 +212,16 @@ class ChatGPTService {
     //   },
     // });
 
+    await this.chatgptKey.update({
+      where: {
+        id: chatgptKey.id,
+      },
+      data: {
+        isRunning: false,
+        lastUsedAt: new Date(),
+      },
+    });
+
     return finalMermaid;
   };
 
@@ -210,6 +241,27 @@ class ChatGPTService {
       },
     });
     if (!findSelection) throw new HttpException(404, "Selection not found");
+
+    const keys = await this.chatgptKey.findMany({
+      where: {
+        isRunning: false,
+      },
+      orderBy: {
+        lastUsedAt: "asc",
+      },
+    });
+
+    if (keys.length < 1) throw new Error("Please try again after a minutes. All keys are running");
+
+    const chatgptKey = keys[0];
+    await this.chatgptKey.update({
+      where: {
+        id: chatgptKey.id,
+      },
+      data: {
+        isRunning: true,
+      },
+    });
 
     const userFlowPrompt = generateUserFlowPrompt(
       findSelection.projectName,
