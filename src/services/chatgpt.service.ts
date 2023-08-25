@@ -155,7 +155,81 @@ class ChatGPTService {
     });
 
     const response = await chatGPTRequest(body);
-    const message: OpenAI.Chat.ChatCompletionMessage = response.data.choices[0].message;
+    const message: OpenAI.Chat.ChatCompletionMessage = response.choices[0].message;
+    const mermaid = message.content;
+
+    let finalMermaid = mermaid.match(/```mermaid(\s+([\s\S]+?))```/gi)[0];
+    finalMermaid = finalMermaid.replaceAll("```mermaid", "").replaceAll("```", "");
+
+    await this.selections.update({
+      where: {
+        id: selectionId,
+      },
+      data: {
+        userFlow: mermaid,
+      },
+    });
+
+    // if (!findSelection.chatGPTBriefAnswer) throw new HttpException(404, "Please generate a brief first");
+
+    // const response = await chatGPTRequestUserFlow(
+    //   findSelection.chatGPTBriefAnswer.prompt,
+    //   findSelection.chatGPTBriefAnswer.answer,
+    //   generateUserFlowPrompt(),
+    // );
+    // const data = response.choices[0].message.content;
+
+    // const convertedData = convertMermaidToReactFlow(data);
+    // console.log({ convertedData });
+
+    // await this.selections.update({
+    //   where: {
+    //     id: selectionId,
+    //   },
+    //   data: {
+    //     userFlow: convertedData,
+    //   },
+    // });
+
+    return finalMermaid;
+  };
+
+  public generateUserFlowWithKey = async (selectionId: number, key?: string) => {
+    // check selection exists
+    const findSelection = await this.selections.findUnique({
+      where: {
+        id: selectionId,
+      },
+      include: {
+        chatGPTBriefAnswer: true,
+        app: {
+          include: {
+            questions: true,
+          },
+        },
+      },
+    });
+    if (!findSelection) throw new HttpException(404, "Selection not found");
+
+    const userFlowPrompt = generateUserFlowPrompt(
+      findSelection.projectName,
+      findSelection.description,
+      findSelection.app.questions.map(question => question.name),
+    );
+
+    const body: OpenAI.Chat.Completions.CreateChatCompletionRequestMessage[] = [
+      {
+        role: "system",
+        content: "You are expert in making software requirement",
+      },
+    ];
+    body.push({
+      role: "user",
+      content: userFlowPrompt,
+    });
+
+    let response;
+    const message: OpenAI.Chat.ChatCompletionMessage = response.choices[0].message;
     const mermaid = message.content;
 
     let finalMermaid = mermaid.match(/```mermaid(\s+([\s\S]+?))```/gi)[0];
